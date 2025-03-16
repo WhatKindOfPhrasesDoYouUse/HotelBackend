@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using HotelBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HotelBackend.Models;
+namespace HotelBackend;
 
 public partial class ApplicationDbContext : DbContext
 {
@@ -65,11 +66,17 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.RoomId).HasColumnName("room_id");
             entity.Property(e => e.UnitPrice).HasColumnName("unit_price");
+            entity.Property(e => e.EmployeeTypeId).HasColumnName("employee_type_id");
 
             entity.HasOne(d => d.Room).WithMany(p => p.Amenities)
                 .HasForeignKey(d => d.RoomId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("amenity_room_id_fkey");
+
+            entity.HasOne(d => d.EmployeeType).WithMany(p => p.Amenities)
+                .HasForeignKey(d => d.EmployeeTypeId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("amenity_employee_type_id_fkey"); 
         });
 
         modelBuilder.Entity<AmenityBooking>(entity =>
@@ -90,6 +97,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.ReadyDate).HasColumnName("ready_date");
             entity.Property(e => e.ReadyTime).HasColumnName("ready_time");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
 
             entity.HasOne(d => d.Amenity).WithMany(p => p.AmenityBookings)
                 .HasForeignKey(d => d.AmenityId)
@@ -99,6 +107,12 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Guest).WithMany(p => p.AmenityBookings)
                 .HasForeignKey(d => d.GuestId)
                 .HasConstraintName("amenity_booking_guest_id_fkey");
+
+            entity.HasOne(d => d.Employee)
+                .WithMany(p => p.AmenityBookings) 
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.SetNull)  
+                .HasConstraintName("amenity_booking_employee_id_fkey");
         });
 
         modelBuilder.Entity<AmenityPayment>(entity =>
@@ -228,6 +242,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.EmployeeTypeId).HasColumnName("employee_type_id");
             entity.Property(e => e.HireDate).HasColumnName("hire_date");
             entity.Property(e => e.WorkScheduleId).HasColumnName("work_schedule_id");
+            entity.Property(e => e.HotelId).HasColumnName("hotel_id");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Employees)
                 .HasForeignKey(d => d.ClientId)
@@ -242,6 +257,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.WorkScheduleId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("employee_work_schedule_id_fkey");
+
+            entity.HasOne(d => d.Hotel).WithMany(p => p.Employees)
+                .HasForeignKey(d => d.HotelId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("employee_hotel_id_fkey");
         });
 
         modelBuilder.Entity<EmployeeType>(entity =>
