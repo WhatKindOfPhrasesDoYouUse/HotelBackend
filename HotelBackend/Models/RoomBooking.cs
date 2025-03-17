@@ -5,9 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelBackend.Models;
 
-/// <summary>
-/// Модель, представляющая бронирования номера.
-/// </summary
+
 [Table(name: "room_booking", Schema = "core")]
 public partial class RoomBooking
 {
@@ -32,18 +30,18 @@ public partial class RoomBooking
     [Required(ErrorMessage = "Поле CheckOutTime модели RoomBooking является обязательным")]
     public TimeOnly CheckOutTime { get; set; }
 
-    [Column(name: "quest_id")]
+    [Column(name: "Guest_id")]
     [Required(ErrorMessage = "Поле QuestId модели RoomBooking является обязательным")]
-    public long QuestId { get; set; }
+    public long GuestId { get; set; }
 
     [Column(name: "room_id")]
     [Required(ErrorMessage = "Поле RoomId модели RoomBooking является обязательным")]
     public long RoomId { get; set; }
 
-    [Column(name: "QuestId")]
-    public virtual Guest Quest { get; set; } = null!;
+    [Column(nameof(GuestId))]
+    public virtual Guest Guest { get; set; } = null!;
 
-    [Column(name: "RoomId")]
+    [Column(nameof(RoomId))]
     public virtual Room Room { get; set; } = null!;
 
     public virtual ICollection<RoomPayment> RoomPayments { get; set; } = new List<RoomPayment>();

@@ -415,11 +415,11 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.CheckInTime).HasColumnName("check_in_time");
             entity.Property(e => e.CheckOutDate).HasColumnName("check_out_date");
             entity.Property(e => e.CheckOutTime).HasColumnName("check_out_time");
-            entity.Property(e => e.QuestId).HasColumnName("quest_id");
+            entity.Property(e => e.GuestId).HasColumnName("quest_id");
             entity.Property(e => e.RoomId).HasColumnName("room_id");
 
-            entity.HasOne(d => d.Quest).WithMany(p => p.RoomBookings)
-                .HasForeignKey(d => d.QuestId)
+            entity.HasOne(d => d.Guest).WithMany(p => p.RoomBookings)
+                .HasForeignKey(d => d.GuestId)
                 .HasConstraintName("room_booking_quest_id_fkey");
 
             entity.HasOne(d => d.Room).WithMany(p => p.RoomBookings)

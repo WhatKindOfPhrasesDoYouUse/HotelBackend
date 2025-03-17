@@ -5,15 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelBackend.Models;
 
-/// <summary>
-/// Модель, представляющая оплату за комнату.
-/// </summary>
 [Table(name: "hotel_review", Schema = "core")]
 public partial class HotelReview
 {
-    /// <summary>
-    /// Первичный ключ для записи отзыва.
-    /// </summary>
     [Column(name: "id")]
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
