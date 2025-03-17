@@ -1,6 +1,4 @@
 ﻿using HotelBackend.ValidationTypes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,8 +20,19 @@ public partial class Guest
     [Column(name: "date_of_birth")]
     [Required(ErrorMessage = "Поле DateOfBirth модели Guest является обязательным")]
     [DataType(DataType.Date)]
-    [CheckDateOfBirth]
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly DateOfBirth
+    {
+        get => _dateOfBirth;
+        set
+        {
+            if (value > DateOnly.FromDateTime(DateTime.Today))
+            {
+                throw new ArgumentOutOfRangeException(nameof(DateOfBirth), "Дата рождения не может быть в будущем.");
+            }
+            _dateOfBirth = value;
+        }
+    }
+    private DateOnly _dateOfBirth;
 
     [Column(name: "passport_series_hash")]
     [Required(ErrorMessage = "Поле PassportSeriesHash модели Guest является обязательным")]

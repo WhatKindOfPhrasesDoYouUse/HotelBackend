@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelBackend.Models;
@@ -22,12 +20,12 @@ public partial class AmenityPayment
 
     [Column(name: "payment_time")]
     [Required(ErrorMessage = "Поле PaymentTime модели AmenityPayment является обязательным")]
-    public TimeOnly PaymentTime { get; set; } 
+    public TimeOnly PaymentTime { get; set; }
 
-    [Column(name: "total_cost")]
-    [Required(ErrorMessage = "Поле TotalCost модели AmenityPayment является обязательным")]
-    [Range(0, int.MaxValue, ErrorMessage = "Поле TotalCost модели AmenityPayment должна быть больше или равна 0.")]
-    public int TotalCost { get; set; }
+    [Column(name: "total_amount")]
+    [Required(ErrorMessage = "Поле TotalAmount модели AmenityPayment является обязательным")]
+    [Range(0, double.MaxValue, ErrorMessage = "Поле TotalAmount модели AmenityPayment должна быть больше или равна 0.")]
+    public decimal TotalAmount { get; set; }
 
     [Column(name: "payment_status")]
     public string? PaymentStatus { get; set; } = null;

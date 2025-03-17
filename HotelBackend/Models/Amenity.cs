@@ -25,22 +25,17 @@ public partial class Amenity
     [Range(0, int.MaxValue, ErrorMessage = "Цена поля UnitPrice модели Amenity не может быть отрицательной.")]
     public int UnitPrice { get; set; }
 
-
     [Column("employee_type_id")]
     public long? EmployeeTypeId { get; set; } = null!;
-
 
     [ForeignKey("EmployeeTypeId")]
     public virtual EmployeeType? EmployeeType { get; set; } = null!;
 
-
     [Column("room_id")]
     public long RoomId { get; set; }
 
-
     [ForeignKey("RoomId")]
     public virtual Room Room { get; set; } = null!;
-
 
     public virtual ICollection<AmenityBooking> AmenityBookings { get; set; } = new List<AmenityBooking>();
 

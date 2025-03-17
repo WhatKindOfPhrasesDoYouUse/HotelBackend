@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelBackend.Models;
@@ -43,7 +41,6 @@ public partial class AmenityBooking
         }
     }
 
-
     [Column(name: "order_time")]
     [Required(ErrorMessage = "Поле OrderTime модели AmenityBooking является обязательным")]
     public TimeOnly OrderTime { get; set; }
@@ -55,7 +52,6 @@ public partial class AmenityBooking
     [Column(name: "ready_time")]
     [Required(ErrorMessage = "Поле ReadyTime модели AmenityBooking является обязательным")]
     public TimeOnly ReadyTime { get; set; }
-
 
     [Column(name: "completion_status")]
     [Required(ErrorMessage = "Поле CompletionStatus модели AmenityBooking является обязательным")]
@@ -83,7 +79,6 @@ public partial class AmenityBooking
 
     [ForeignKey(nameof(GuestId))]
     public virtual Guest Guest { get; set; } = null!;
-
 
     [ForeignKey(nameof(EmployeeId))]
     public virtual Employee Employee { get; set; } = null!;

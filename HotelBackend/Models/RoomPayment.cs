@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelBackend.Models;
@@ -20,8 +18,8 @@ public partial class RoomPayment
     [Required(ErrorMessage = "Поле PaymentTime модели RoomPayment является обязательным")]
     public TimeOnly PaymentTime { get; set; }
 
-    [Column(name: "total_cost")]
-    [Required(ErrorMessage = "Поле TotalCost модели RoomPayment является обязательным")]
+    [Column(name: "total_amount")]
+    [Required(ErrorMessage = "Поле TotalAmount модели RoomPayment является обязательным")]
     [Range(0, double.MaxValue, ErrorMessage = "Поле TotalAmount модели RoomPayment должна быть больше или равна 0.")]
     public decimal TotalAmount { get; set; }
 

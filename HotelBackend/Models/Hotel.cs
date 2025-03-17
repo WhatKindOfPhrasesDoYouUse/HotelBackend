@@ -1,6 +1,4 @@
 ﻿using HotelBackend.ValidationTypes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -43,8 +41,20 @@ public partial class Hotel
     public string Email { get; set; } = null!;
 
     [Column(name: "year_of_construction")]
-    [CheckYearOfConstruction]
-    public int? YearOfConstruction { get; set; }
+    public int? YearOfConstruction
+    {
+        get => _yearOfConstruction;
+        set
+        {
+            if (value.HasValue && (value < 1300 || value > DateTime.Now.Year))
+            {
+                throw new ArgumentOutOfRangeException(nameof(YearOfConstruction),
+                    $"Поле YearOfConstruction должно быть в интервале от 1300 до {DateTime.Now.Year}.");
+            }
+            _yearOfConstruction = value;
+        }
+    }
+    private int? _yearOfConstruction;
 
     [Column("rating")]
     [Required(ErrorMessage = "Поле Rating модели Hotel являеться обязательным")]

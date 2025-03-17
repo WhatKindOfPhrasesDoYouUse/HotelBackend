@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using HotelBackend.Models;
+﻿using HotelBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBackend;
@@ -130,7 +128,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("payment_status");
             entity.Property(e => e.PaymentTime).HasColumnName("payment_time");
             entity.Property(e => e.PaymentTypeId).HasColumnName("payment_type_id");
-            entity.Property(e => e.TotalCost).HasColumnName("total_cost");
+            entity.Property(e => e.TotalAmount).HasColumnName("total_amount");
 
             entity.HasOne(d => d.AmenityBooking).WithMany(p => p.AmenityPayments)
                 .HasForeignKey(d => d.AmenityBookingId)
@@ -415,7 +413,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.CheckInTime).HasColumnName("check_in_time");
             entity.Property(e => e.CheckOutDate).HasColumnName("check_out_date");
             entity.Property(e => e.CheckOutTime).HasColumnName("check_out_time");
-            entity.Property(e => e.GuestId).HasColumnName("quest_id");
+            entity.Property(e => e.GuestId).HasColumnName("guest_id");
             entity.Property(e => e.RoomId).HasColumnName("room_id");
 
             entity.HasOne(d => d.Guest).WithMany(p => p.RoomBookings)
