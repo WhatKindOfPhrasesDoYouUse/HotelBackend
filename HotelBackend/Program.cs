@@ -26,6 +26,7 @@ builder.Services.AddControllers()
 
 // регистрация сервисов
 builder.Services.AddScoped<IHotelService, HotelService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 
 builder.Services.AddCors(options =>
