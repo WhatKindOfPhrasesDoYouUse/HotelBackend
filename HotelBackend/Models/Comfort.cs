@@ -17,5 +17,5 @@ public partial class Comfort
     [NameValidation]
     public string Name { get; set; } = null!;
 
-    public virtual ICollection<Room> Rooms { get; set; } = new List<Room>();
+    public virtual ICollection<RoomComfort> RoomComforts { get; set; } = new List<RoomComfort>();
 }

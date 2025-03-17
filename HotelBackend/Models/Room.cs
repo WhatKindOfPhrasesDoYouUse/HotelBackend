@@ -19,7 +19,7 @@ public partial class Room
     [Column(name: "description")]
     public string? Description { get; set; }
 
-    [Column(name: "сapacity")]
+    [Column(name: "capacity")]
     [Required(ErrorMessage = "Поле Capacity модели Room является обязательным")]
     [Range(1, int.MaxValue, ErrorMessage = "Поле Capacity модели Room должно быть больше 0")]
     public int Capacity { get; set; }
@@ -40,5 +40,5 @@ public partial class Room
 
     public virtual ICollection<RoomBooking> RoomBookings { get; set; } = new List<RoomBooking>();
 
-    public virtual ICollection<Comfort> Comforts { get; set; } = new List<Comfort>();
+    public virtual ICollection<RoomComfort> RoomComforts { get; set; } = new List<RoomComfort>();
 }

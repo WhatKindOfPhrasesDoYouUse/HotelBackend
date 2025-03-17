@@ -217,14 +217,14 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("phone_number");
         });
 
-        modelBuilder.Entity<Comfort>(entity =>
+        /*modelBuilder.Entity<Comfort>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("comfort_pkey");
 
             entity.ToTable("comfort", "core");
 
             entity.Property(e => e.Id).HasColumnName("id");
-        });
+        });*/
 
         modelBuilder.Entity<Employee>(entity =>
         {
@@ -323,6 +323,16 @@ public partial class ApplicationDbContext : DbContext
                 .HasDefaultValueSql("1")
                 .HasColumnName("rating");
             entity.Property(e => e.YearOfConstruction).HasColumnName("year_of_construction");
+
+            entity.Property(e => e.HotelTypeId)
+                .HasColumnName("hotel_type_id")
+                .IsRequired();
+
+            entity.HasOne(h => h.HotelType)
+                .WithMany(ht => ht.Hotels)
+                .HasForeignKey(h => h.HotelTypeId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_hotel_hotel_type");
         });
 
         modelBuilder.Entity<HotelReview>(entity =>
@@ -356,6 +366,12 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description).HasColumnName("description");
+
+            entity.HasMany(ht => ht.Hotels)
+                .WithOne(h => h.HotelType)
+                .HasForeignKey(h => h.HotelTypeId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_hotel_hotel_type");
         });
 
         modelBuilder.Entity<PaymentType>(entity =>
@@ -367,7 +383,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
         });
 
-        modelBuilder.Entity<Room>(entity =>
+        /*modelBuilder.Entity<Room>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("room_pkey");
 
@@ -384,23 +400,41 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.HotelId)
                 .HasConstraintName("room_hotel_id_fkey");
 
-            entity.HasMany(d => d.Comforts).WithMany(p => p.Rooms)
-                .UsingEntity<Dictionary<string, object>>(
-                    "RoomComfort",
-                    r => r.HasOne<Comfort>().WithMany()
-                        .HasForeignKey("ComfortId")
-                        .HasConstraintName("room_comfort_comfort_id_fkey"),
-                    l => l.HasOne<Room>().WithMany()
-                        .HasForeignKey("RoomId")
-                        .HasConstraintName("room_comfort_room_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("RoomId", "ComfortId").HasName("room_comfort_pkey");
-                        j.ToTable("room_comfort", "core");
-                        j.IndexerProperty<int>("RoomId").HasColumnName("room_id");
-                        j.IndexerProperty<int>("ComfortId").HasColumnName("comfort_id");
-                    });
-        });
+            // Настройка для связи с RoomComfort (сущность Room)
+            entity.HasMany(d => d.RoomComforts)
+                .WithOne(rc => rc.Room)  // У каждой RoomComfort есть один Room
+                .HasForeignKey(rc => rc.RoomId)  // Внешний ключ для RoomId
+                .HasConstraintName("room_comfort_room_id_fkey");
+
+            // Настройка для связи с RoomComfort (сущность Comfort)
+            entity.HasMany(d => d.RoomComforts)
+                .WithOne(rc => rc.Comfort)  // У каждой RoomComfort есть один Comfort
+                .HasForeignKey(rc => rc.ComfortId)  // Внешний ключ для ComfortId
+                .HasConstraintName("room_comfort_comfort_id_fkey");
+        });*/
+
+        modelBuilder.Entity<Room>()
+            .HasOne(h => h.Hotel)
+            .WithMany(r => r.Rooms)
+            .HasForeignKey(k => k.HotelId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Comfort>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<RoomComfort>()
+            .HasKey(rc => new { rc.RoomId, rc.ComfortId });
+
+        modelBuilder.Entity<RoomComfort>()
+            .HasOne(r => r.Room)
+            .WithMany(c => c.RoomComforts)
+            .HasForeignKey(k => k.RoomId);
+
+        modelBuilder.Entity<RoomComfort>()
+            .HasOne(c => c.Comfort)
+            .WithMany(r => r.RoomComforts)
+            .HasForeignKey(k => k.ComfortId);
 
         modelBuilder.Entity<RoomBooking>(entity =>
         {

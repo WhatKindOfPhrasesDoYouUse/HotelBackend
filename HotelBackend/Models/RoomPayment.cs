@@ -34,7 +34,7 @@ public partial class RoomPayment
     [Required(ErrorMessage = "Поле RoomBookingId модели RoomPayment является обязательным")]
     public long RoomBookingId { get; set; }
 
-    [ForeignKey(nameof(PaymentType))]
+    [ForeignKey(nameof(PaymentTypeId))]
     public virtual PaymentType PaymentType { get; set; } = null!;
 
     [ForeignKey(nameof(RoomBookingId))]

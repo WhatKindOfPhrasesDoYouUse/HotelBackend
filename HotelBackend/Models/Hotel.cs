@@ -61,6 +61,12 @@ public partial class Hotel
     [Range(1, 5, ErrorMessage = "Поле Rating модели Hotel должен быть от 1 до 5")]
     public double Rating { get; set; } = 1;
 
+    [Column(name: "hotel_type_id")]
+    public long HotelTypeId { get; set; }
+
+    [ForeignKey(nameof(HotelTypeId))]
+    public HotelType HotelType { get; set; } = null!;
+
     public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 
     public virtual ICollection<HotelReview> HotelReviews { get; set; } = new List<HotelReview>();

@@ -14,10 +14,8 @@ namespace HotelBackend.Models
         [Required(ErrorMessage = "Поле ComfortId модели RoomComfort является обязательным")]
         public long ComfortId { get; set; }
 
-        [ForeignKey(nameof(RoomId))]
         public virtual Room Room { get; set; } = null!;
 
-        [ForeignKey(nameof(ComfortId))]
         public virtual Comfort Comfort { get; set; } = null!;
     }
 }

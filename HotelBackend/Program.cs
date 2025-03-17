@@ -1,4 +1,6 @@
 using HotelBackend;
+using HotelBackend.Contracts;
+using HotelBackend.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -16,11 +18,35 @@ builder.Services.AddControllers()
         });
 
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+    });
+
+// регистрация сервисов
+builder.Services.AddScoped<IHotelService, HotelService>();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:5173")
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+app.UseCors("AllowReactApp");
 
 // Configure the HTTP request pipeline.
 
