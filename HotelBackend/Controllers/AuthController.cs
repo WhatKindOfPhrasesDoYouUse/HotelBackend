@@ -41,5 +41,19 @@ namespace HotelBackend.Controllers
                 }
             }
         }
+
+        [HttpPost("registration")]
+        public async Task<IActionResult> Register([FromBody] RegistrationGuestDto registrationGuestDto)
+        {
+            try
+            {
+                string result = await _authService.Registration(registrationGuestDto);
+                return Ok(new { message = result });
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

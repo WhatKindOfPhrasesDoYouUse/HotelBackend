@@ -1,6 +1,7 @@
 ﻿using HotelBackend.ValidationTypes;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace HotelBackend.Models;
 
@@ -20,7 +21,7 @@ public partial class Guest
     [Column(name: "date_of_birth")]
     [Required(ErrorMessage = "Поле DateOfBirth модели Guest является обязательным")]
     [DataType(DataType.Date)]
-    public DateOnly DateOfBirth
+/*    public DateOnly DateOfBirth
     {
         get => _dateOfBirth;
         set
@@ -32,7 +33,8 @@ public partial class Guest
             _dateOfBirth = value;
         }
     }
-    private DateOnly _dateOfBirth;
+    private DateOnly _dateOfBirth;*/
+    public DateTime DateOfBirth { get; set; }
 
     [Column(name: "passport_series_hash")]
     [Required(ErrorMessage = "Поле PassportSeriesHash модели Guest является обязательным")]
@@ -60,7 +62,7 @@ public partial class Guest
     public long ClientId { get; set; }
 
     [ForeignKey(nameof(ClientId))]
-    public virtual Client Client { get; set; } = null!;
+    public virtual Client? Client { get; set; } = null!;
 
     public virtual ICollection<AmenityBooking> AmenityBookings { get; set; } = new List<AmenityBooking>();
 
