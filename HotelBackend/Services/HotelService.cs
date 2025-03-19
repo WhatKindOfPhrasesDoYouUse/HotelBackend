@@ -35,7 +35,7 @@ namespace HotelBackend.Services
             }
             catch (Exception ex)
             {
-                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при получении отелей", ex);
+                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при получении отелей со стороны сервера", ex);
             }
         }
     }
