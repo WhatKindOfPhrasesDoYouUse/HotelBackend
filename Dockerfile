@@ -8,10 +8,10 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["HotelBackend/HotelBackend.csproj", "HotelBackend/"]
-RUN dotnet restore "./HotelBackend/HotelBackend.csproj"
+COPY ["HotelBackend.csproj", "."]
+RUN dotnet restore "./HotelBackend.csproj"
 COPY . .
-WORKDIR "/src/HotelBackend"
+WORKDIR "/src/."
 RUN dotnet build "./HotelBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
