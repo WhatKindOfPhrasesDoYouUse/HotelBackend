@@ -31,7 +31,8 @@ namespace HotelBackend.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, client.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("client_id", client.Id.ToString())
+                new Claim("client_id", client.Id.ToString()),
+                new Claim("client_name", client.Name.ToString())
             };
 
             using (var context = new ApplicationDbContext())
