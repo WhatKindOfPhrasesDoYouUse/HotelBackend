@@ -21,7 +21,7 @@ namespace HotelBackend.Services
                 }
 
                 var client = await _context.Clients
-                    .Include(c => c.Guests)
+                    .Include(c => c.Guest)
                     .FirstOrDefaultAsync(c => c.Id == clientId);
 
                 if (client == null)

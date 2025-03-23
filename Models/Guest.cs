@@ -62,7 +62,7 @@ public partial class Guest
     public long ClientId { get; set; }
 
     [ForeignKey(nameof(ClientId))]
-    public virtual Client? Client { get; set; } = null!;
+    public virtual Client Client { get; set; } = null!;
 
     public virtual ICollection<AmenityBooking> AmenityBookings { get; set; } = new List<AmenityBooking>();
 

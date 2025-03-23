@@ -94,7 +94,60 @@ namespace HotelBackend.Services
             }
         }
 
-        public async Task<string> Registration(RegistrationGuestDto registrationGuestDto)
+        public async Task<string> RegistrationGuest(RegistrationGuestDto registrationGuestDto)
+        {
+            if (registrationGuestDto == null)
+            {
+                throw new ServiceException(ErrorCode.BadRequest, "Отсутствует информация о госте");
+            }
+
+            var existingClient = await _context.Clients.FirstOrDefaultAsync(c => c.Email == registrationGuestDto.Email);
+
+            if (existingClient != null)
+            {
+                throw new ServiceException(ErrorCode.BadRequest, "Клиент с таким email уже существует");
+            }
+
+            try
+            {
+                Client client = new Client()
+                {
+                    Name = registrationGuestDto.Name,
+                    Surname = registrationGuestDto.Surname,
+                    Patronymic = registrationGuestDto.Patronymic,
+                    Email = registrationGuestDto.Email,
+                    PhoneNumber = registrationGuestDto.PhoneNumber,
+                    PasswordHash = ""
+                };
+
+                client.PasswordHash = HashPassword(client, registrationGuestDto.PasswordHash);
+
+                await _context.Clients.AddAsync(client);
+                await _context.SaveChangesAsync();
+
+                Guest guest = new Guest()
+                {
+                    CityOfResidence = registrationGuestDto.CityOfResidence,
+                    DateOfBirth = registrationGuestDto.DateOfBirth.Kind == DateTimeKind.Unspecified
+                        ? DateTime.SpecifyKind(registrationGuestDto.DateOfBirth, DateTimeKind.Utc)
+                        : registrationGuestDto.DateOfBirth.ToUniversalTime(),
+                    PassportSeriesHash = registrationGuestDto.PassportSeriesHash,
+                    PassportNumberHash = registrationGuestDto.PassportNumberHash,
+                    ClientId = client.Id
+                };
+
+                await _context.Guests.AddAsync(guest);
+                await _context.SaveChangesAsync();
+
+                return "Регистрация прошла успешно";
+            } 
+            catch (ServiceException ex)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при регистрации", ex);
+            }
+        }
+
+        /*public async Task<string> Registration(RegistrationGuestDto registrationGuestDto)
         {
             if (registrationGuestDto.Client == null || registrationGuestDto.Guest == null)
             {
@@ -144,6 +197,6 @@ namespace HotelBackend.Services
             {
                 throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при регистрации", ex);
             }
-        }
+        }*/
     }
 }

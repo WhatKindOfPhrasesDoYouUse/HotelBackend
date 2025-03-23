@@ -220,6 +220,12 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.PhoneNumber)
                 .HasMaxLength(12)
                 .HasColumnName("phone_number");
+
+            entity.HasOne(d => d.Guest)
+               .WithOne(p => p.Client)
+               .HasForeignKey<Guest>(d => d.ClientId) 
+               .OnDelete(DeleteBehavior.Cascade)  
+               .HasConstraintName("guest_client_id_fkey");
         });
 
         /*modelBuilder.Entity<Comfort>(entity =>
@@ -298,9 +304,12 @@ public partial class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("guest_card_id_fkey");
 
-            entity.HasOne(d => d.Client).WithMany(p => p.Guests)
-                .HasForeignKey(d => d.ClientId)
+            entity.HasOne(d => d.Client)
+                .WithOne(p => p.Guest)
+                .HasForeignKey<Guest>(d => d.ClientId)
                 .HasConstraintName("guest_client_id_fkey");
+
+            entity.HasIndex(e => e.ClientId).IsUnique();
         });
 
         modelBuilder.Entity<Hotel>(entity =>

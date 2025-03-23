@@ -43,11 +43,11 @@ namespace HotelBackend.Controllers
         }
 
         [HttpPost("registration")]
-        public async Task<IActionResult> Register([FromBody] RegistrationGuestDto registrationGuestDto)
+        public async Task<IActionResult> RegistrationGuest([FromBody] RegistrationGuestDto registrationGuestDto)
         {
             try
             {
-                string result = await _authService.Registration(registrationGuestDto);
+                string result = await _authService.RegistrationGuest(registrationGuestDto);
                 return Ok(new { message = result });
             }
             catch (ServiceException ex)
