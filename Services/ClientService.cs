@@ -2,6 +2,7 @@
 using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBackend.Services
@@ -9,8 +10,30 @@ namespace HotelBackend.Services
     public class ClientService : IClientService
     {
         private readonly ApplicationDbContext _context;
+        private readonly PasswordHasher<Client> _passwordHasher;
 
-        public ClientService(ApplicationDbContext context) => this._context = context;
+        public ClientService(ApplicationDbContext context, PasswordHasher<Client> passwordHasher)
+        {
+            this._context = context;
+            this._passwordHasher = passwordHasher;
+        }
+
+        public string HashPassword(Client client, string password)
+        {
+            return _passwordHasher.HashPassword(client, password);
+        }
+
+        public bool VerifyPassword(Client client, string password)
+        {
+            var verificationResult = _passwordHasher.VerifyHashedPassword(client, client.PasswordHash, password);
+            return verificationResult == PasswordVerificationResult.Success;
+        }
+
+        public bool IsSamePassword(Client client, string newPassword)
+        {
+            return _passwordHasher.VerifyHashedPassword(client, client.PasswordHash, newPassword)
+                == PasswordVerificationResult.Success;
+        }
 
         public async Task<Client> GetGuestByClientId(long clientId)
         {
@@ -91,7 +114,7 @@ namespace HotelBackend.Services
 
                 return client;
             }
-            catch (ServiceException ex)
+            catch (ServiceException)
             {
                 throw;
             }
@@ -99,6 +122,53 @@ namespace HotelBackend.Services
             {
                 throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при обновлении данных клиента.", ex);
             }
+        }
+
+        public async Task<string> UpdatePassword(long clientId, UpdatePasswordDto updatePasswordDto)
+        {
+            try
+            {
+                if (clientId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id клиента не может быть отрицательным значением");
+                }
+
+                var client = await _context.Clients.Include(g => g.Guest).FirstOrDefaultAsync(c => c.Id == clientId);
+
+                if (client == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Клиента с таким id: {clientId} не существует");
+                }
+
+                if (!VerifyPassword(client, updatePasswordDto.OldPassword))
+                {
+                    throw new ServiceException(ErrorCode.Unauthorized, "Старый пароль введен неверно");
+                }
+
+                if (IsSamePassword(client, updatePasswordDto.NewPassword))
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Новый пароль не должен совпадать с текущим");
+                }
+
+                if (updatePasswordDto.NewPassword != updatePasswordDto.ConfirmPassword)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Новый пароль и подтверждение пароля не совпадают");
+                }
+
+                client.PasswordHash = HashPassword(client, updatePasswordDto.NewPassword);
+                await _context.SaveChangesAsync();
+
+                return "Пароль успешно обновлен";
+            } 
+            catch (ServiceException) 
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при обновлении пароля.", ex);
+            }
+
         }
     }
 }

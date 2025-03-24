@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -65,6 +66,29 @@ namespace HotelBackend.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, "Произошла ошибка при обновлении данных клиента.");
+            }
+        }
+
+        [HttpPatch("{clientId}/password")]
+        public async Task<IActionResult> UpdatePassword(long clientId, [FromBody] UpdatePasswordDto updatePasswordDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var result = await _clientService.UpdatePassword(clientId, updatePasswordDto);
+                return Ok(new { message = result });
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { error = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
             }
         }
     }
