@@ -56,6 +56,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { error = "Произошла ошибка сервера", details =ex.Message });
             }
         }
-        
+
+        [HttpGet("filter/{hotelId}")]
+        public async Task<IActionResult> FilterRooms(long hotelId, [FromQuery] int? capacity, [FromQuery] int? minUnitPrice, [FromQuery] int? maxUnitPrice)
+        {
+            try
+            {
+                var rooms = await _roomService.FilterRooms(hotelId, capacity, minUnitPrice, maxUnitPrice);
+                return Ok(rooms);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new {message  = ex.Message});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
+            }
+        }
     }
 }

@@ -6,5 +6,6 @@ namespace HotelBackend.Contracts
     {
         Task<IEnumerable<Room>> GetRoomsByHotelId(long hotelId);
         Task<IEnumerable<Room>> SortRooms(long hotelId, bool? sortingDirectionByPrice, bool? sortingDirectionByCapacity);
+        Task<IEnumerable<Room>> FilterRooms(long hotelId, int? capacity, int? minUnitPrice, int? maxUnitPrice);
     }
 }
