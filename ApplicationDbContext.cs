@@ -52,6 +52,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<WorkSchedule> WorkSchedules { get; set; }
 
+    public virtual DbSet<RoomComfort> RoomsComforts { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql("Host=127.0.0.1;Port=5432;Database=hotel_database;Username=postgres;Password=root;");

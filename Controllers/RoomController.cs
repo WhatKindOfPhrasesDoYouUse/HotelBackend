@@ -39,7 +39,7 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpGet("sort/{hoteldId}")]
+        [HttpGet("sort/{hoteldId:long}")]
         public async Task<IActionResult> SortRooms(long hoteldId, bool? sortingDirectionByPrice, bool? sortingDirectionByCapacity)
         {
             try
@@ -57,7 +57,7 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpGet("filter/{hotelId}")]
+        [HttpGet("filter/{hotelId:long}")]
         public async Task<IActionResult> FilterRooms(long hotelId, [FromQuery] int? capacity, [FromQuery] int? minUnitPrice, [FromQuery] int? maxUnitPrice)
         {
             try
@@ -68,6 +68,24 @@ namespace HotelBackend.Controllers
             catch (ServiceException ex)
             {
                 return StatusCode((int)ex.ErrorCode, new {message  = ex.Message});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
+            }
+        }
+
+        [HttpGet("{roomId:long}/comforts")]
+        public async Task<IActionResult> GetComfortsByRoomId(long roomId)
+        {
+            try
+            {
+                var comforts = await _roomService.GetComfortsByRoomId(roomId);
+                return Ok(comforts);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { message = ex.Message });
             }
             catch (Exception ex)
             {

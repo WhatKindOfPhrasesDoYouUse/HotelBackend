@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBackend.Services
@@ -109,6 +110,38 @@ namespace HotelBackend.Services
                 }
 
                 return query.ToList();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка со стороны сервера при фильтрации данных", ex);
+            }
+        }
+
+        public async Task<IEnumerable<Comfort>> GetComfortsByRoomId(long roomId) 
+        {
+            try
+            {
+                if (roomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id комнаты не может быть отрицательным числом");
+                }
+
+                var comforts = await _context.RoomsComforts
+                    .Where(rc => rc.RoomId == roomId)
+                    .Include(rc => rc.Comfort)
+                    .Select(rc => rc.Comfort)
+                    .ToListAsync();
+
+                if (comforts == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комфортности для комнаты с id: {roomId} не найдены");
+                }
+
+                return comforts;
             }
             catch (ServiceException)
             {
