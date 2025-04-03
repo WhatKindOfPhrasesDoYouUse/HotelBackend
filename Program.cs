@@ -35,6 +35,7 @@ builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<PasswordHasher<Client>>();
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IComfortService, ComfortService>();
 
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");

@@ -16,8 +16,10 @@ namespace HotelBackend.Services
         {
             try
             {
-                var rooms = await _context.Rooms.Where(r => r.HotelId == hotelId).ToListAsync();
-
+                var rooms = await _context.Rooms
+                    .Where(r => r.HotelId == hotelId)
+                    .ToListAsync();
+                
                 if (rooms == null || rooms.Count == 0)
                 {
                     throw new ServiceException(ErrorCode.NotFound, "Комнаты не найдены");
@@ -127,7 +129,7 @@ namespace HotelBackend.Services
             {
                 if (roomId <= 0)
                 {
-                    throw new ServiceException(ErrorCode.BadRequest, "id комнаты не может быть отрицательным числом");
+                    throw new ServiceException(ErrorCode.BadRequest, $"id комнаты: {roomId} не может быть отрицательным числом");
                 }
 
                 var comforts = await _context.RoomsComforts
@@ -142,6 +144,28 @@ namespace HotelBackend.Services
                 }
 
                 return comforts;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка со стороны сервера при фильтрации данных", ex);
+            }
+        }
+
+        public async Task<IEnumerable<Room>> FilterRoomsByComforts(long hotelId, List<long>? comfortIds)
+        {
+            try
+            {
+                if (hotelId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"id отеля: {hotelId} не может быть отрицательным числом");
+                }
+
+                return await _context.Rooms.Where(room => room.RoomComforts.Any(rc => comfortIds.Contains(rc.ComfortId)))
+                    .ToListAsync();
             }
             catch (ServiceException)
             {
