@@ -168,7 +168,6 @@ namespace HotelBackend.Services
             {
                 throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при обновлении пароля.", ex);
             }
-
         }
     }
 }

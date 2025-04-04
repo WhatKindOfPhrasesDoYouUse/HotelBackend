@@ -28,7 +28,7 @@ public partial class Card
     public long BankId { get; set; }
 
     [ForeignKey(nameof(BankId))]
-    public virtual Bank Bank { get; set; } = null!;
+    public virtual Bank? Bank { get; set; } = null!;
 
     public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
 }

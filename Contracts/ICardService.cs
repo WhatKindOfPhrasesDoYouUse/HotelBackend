@@ -1,10 +1,10 @@
-﻿using HotelBackend.DataTransferObjects;
-using HotelBackend.Models;
+﻿using HotelBackend.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Contracts
 {
     public interface ICardService
     {
-        Task<Card> CreateAndAndAttachCardToGuest(CreateCardAndAttachDto createCardAndAttachDto);
+        Task<Card> CreateCard(Card card);
     }
 }

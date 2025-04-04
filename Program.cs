@@ -36,7 +36,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<PasswordHasher<Client>>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IComfortService, ComfortService>();
-
+builder.Services.AddScoped<IGuestService, GuestService>();
+builder.Services.AddScoped<ICardService, CardService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
