@@ -28,7 +28,7 @@ public partial class RoomBooking
     [Required(ErrorMessage = "Поле CheckOutTime модели RoomBooking является обязательным")]
     public TimeOnly CheckOutTime { get; set; }
 
-    [Column(name: "Guest_id")]
+    [Column(name: "guest_id")]
     [Required(ErrorMessage = "Поле QuestId модели RoomBooking является обязательным")]
     public long GuestId { get; set; }
 
@@ -37,10 +37,10 @@ public partial class RoomBooking
     public long RoomId { get; set; }
 
     [Column(nameof(GuestId))]
-    public virtual Guest Guest { get; set; } = null!;
+    public virtual Guest? Guest { get; set; } = null!;
 
     [Column(nameof(RoomId))]
-    public virtual Room Room { get; set; } = null!;
+    public virtual Room? Room { get; set; } = null!;
 
     public virtual ICollection<RoomPayment> RoomPayments { get; set; } = new List<RoomPayment>();
 }
