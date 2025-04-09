@@ -14,17 +14,17 @@ namespace HotelBackend.Controllers
 
         public GuestController(IGuestService guestService) => this._guestService = guestService;
 
-        [HttpPatch("{guestId}/bind-card/{cardId}")]
-        public async Task<IActionResult> BindCardToGuest(long guestId, long cardId)
+        [HttpPatch("{clientId}/bind-card/{cardId}")]
+        public async Task<IActionResult> BindCardToGuest(long clientId, long cardId)
         {
-            if (guestId <= 0 || cardId <= 0)
+            if (clientId <= 0 || cardId <= 0)
             {
-                return BadRequest("ID гостя и ID карты должны быть больше нуля.");
+                return BadRequest("Id гостя и ID карты должны быть больше нуля.");
             }
 
             try
             {
-                var updatedGuest = await _guestService.BindCardToGuest(guestId, cardId);
+                var updatedGuest = await _guestService.BindCardToGuest(clientId, cardId);
                 return Ok(updatedGuest);
             }
             catch (ServiceException ex)
@@ -38,5 +38,22 @@ namespace HotelBackend.Controllers
             }
         }
 
+        [HttpGet("{clientId}")]
+        public async Task<IActionResult> GetGuestByClientId(long clientId)
+        {
+            try
+            {
+                var guest = await _guestService.GetGuestByClientId(clientId);
+                return Ok(guest);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при получении данных гостя", details = ex.Message });
+            }
+        }
     }
 }

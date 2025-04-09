@@ -16,14 +16,24 @@ namespace HotelBackend.Services
         {
             try
             {
-                var existingCard = await _context.Cards.FirstOrDefaultAsync(c => c.Id == card.Id);
+                var existingCard = await _context.Cards
+                    .FirstOrDefaultAsync(c => c.GuestId == card.GuestId);
 
                 if (existingCard != null)
+                {
+                    throw new ServiceException(ErrorCode.Conflict, $"Гость с ID {card.GuestId} уже имеет привязанную карту");
+                }
+
+                var existingNumber = await _context.Cards
+                    .FirstOrDefaultAsync(c => c.CardNumber == card.CardNumber);
+
+                if (existingNumber != null)
                 {
                     throw new ServiceException(ErrorCode.Conflict, "Карта с таким номером уже существует");
                 }
 
-                var bank = await _context.Banks.FirstOrDefaultAsync(b => b.Id == card.BankId);
+                var bank = await _context.Banks
+                    .FirstOrDefaultAsync(b => b.Id == card.BankId);
 
                 if (bank == null)
                 {
@@ -35,15 +45,15 @@ namespace HotelBackend.Services
 
                 return card;
             }
-            catch (ServiceException) 
+            catch (ServiceException)
             {
-                throw; 
+                throw;
             }
             catch (DbUpdateException ex)
             {
                 throw new ServiceException(ErrorCode.DatabaseError, "Ошибка при сохранении данных", ex);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 throw new ServiceException(ErrorCode.InternalServerError, "Внутренняя ошибка сервера", ex);
             }

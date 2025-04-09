@@ -30,7 +30,7 @@ namespace HotelBackend.Services
             }
             catch (Exception ex)
             {
-                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка со стороны сервера при фильтрации данных", ex);
+                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка со стороны сервера при получении данных бронирований комнат", ex);
             }
         }
 
@@ -69,5 +69,33 @@ namespace HotelBackend.Services
                 throw new ServiceException(ErrorCode.InternalServerError, $"Произошла ошибка со стороны сервера при получении бронирований комнат гостя с id: {guestId}", ex);
             }
         }
+
+       /* public async Task<RoomBooking> SaveRoomBooking(RoomBooking roomBooking)
+        {
+            try
+            {
+                if (roomBooking.GuestId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id гостя не может быть меньше или равно нулю");
+                }
+
+                if (await _context.Guests.FindAsync(roomBooking.GuestId) == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Гость с id: {roomBooking.GuestId} не найден");
+                }
+
+                if (roomBooking.RoomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id комнаты не может быть меньше или равно нулю");
+                }
+
+                if (await _context.Rooms.FindAsync(roomBooking.RoomId) == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {roomBooking.RoomId} не найден");
+                }
+
+                // доделать логику бронирования комнаты, с наложением дат. И проверкой что In дата раньше чем out.
+            }
+        }*/
     }
 }

@@ -51,18 +51,14 @@ public partial class Guest
     [MaxLength(50, ErrorMessage = "Длина поля LoyaltyStatus модели Guest не может превышать 50 символов")]
     public string LoyaltyStatus { get; set; } = "Базовый";
 
-    [Column(name: "card_id")]
-    public long? CardId { get; set; }
-
-    [ForeignKey(nameof(CardId))]
-    public virtual Card? Card { get; set; }
-
     [Column(name: "client_id")]
     [Required(ErrorMessage = "Поле ClientId модели Guest является обязательным")]
     public long ClientId { get; set; }
 
     [ForeignKey(nameof(ClientId))]
     public virtual Client Client { get; set; } = null!;
+
+    public virtual Card? Card { get; set; }
     
     public virtual ICollection<AmenityBooking> AmenityBookings { get; set; } = new List<AmenityBooking>();
 

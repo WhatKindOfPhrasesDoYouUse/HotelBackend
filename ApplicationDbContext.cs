@@ -187,19 +187,25 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("card", "core");
 
             entity.HasIndex(e => e.CardNumber, "card_card_number_key").IsUnique();
+            entity.HasIndex(e => e.GuestId, "card_guest_id_key").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CardNumber).HasMaxLength(16).HasColumnName("card_number");
+            entity.Property(e => e.CardDate).HasMaxLength(5).HasColumnName("card_date");
             entity.Property(e => e.BankId).HasColumnName("bank_id");
-            entity.Property(e => e.CardDate)
-                .HasMaxLength(5)
-                .HasColumnName("card_date");
-            entity.Property(e => e.CardNumber)
-                .HasMaxLength(16)
-                .HasColumnName("card_number");
+            entity.Property(e => e.GuestId).HasColumnName("guest_id");
 
-            entity.HasOne(d => d.Bank).WithMany(p => p.Cards)
+            entity.HasOne(d => d.Bank)
+                .WithMany(p => p.Cards)
                 .HasForeignKey(d => d.BankId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("card_bank_id_fkey");
+
+            entity.HasOne(d => d.Guest)
+                .WithOne(p => p.Card)
+                .HasForeignKey<Card>(d => d.GuestId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("card_guest_id_fkey");
         });
 
         modelBuilder.Entity<Client>(entity =>
@@ -291,24 +297,23 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("guest", "core");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CardId).HasColumnName("card_id");
             entity.Property(e => e.ClientId).HasColumnName("client_id");
             entity.Property(e => e.DateOfBirth).HasColumnName("date_of_birth");
+            entity.Property(e => e.CityOfResidence).HasColumnName("city_of_residence");
             entity.Property(e => e.PassportNumberHash)
                 .HasMaxLength(150)
                 .HasColumnName("passport_number_hash");
             entity.Property(e => e.PassportSeriesHash)
                 .HasMaxLength(150)
                 .HasColumnName("passport_series_hash");
-
-            entity.HasOne(d => d.Card).WithMany(p => p.Guests)
-                .HasForeignKey(d => d.CardId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("guest_card_id_fkey");
+            entity.Property(e => e.LoyaltyStatus)
+                .HasMaxLength(50)
+                .HasColumnName("loyalty_status");
 
             entity.HasOne(d => d.Client)
                 .WithOne(p => p.Guest)
                 .HasForeignKey<Guest>(d => d.ClientId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("guest_client_id_fkey");
 
             entity.HasIndex(e => e.ClientId).IsUnique();
