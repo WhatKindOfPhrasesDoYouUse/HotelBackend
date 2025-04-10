@@ -41,5 +41,41 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, "Произошла ошибка на сервере");
             }
         }
+
+        [HttpGet("{guestId}/guest")]
+        public async Task<IActionResult> GetCardByGuestIdEndpoint(long guestId)
+        {
+            try
+            {
+                var card = await _cardService.GetCardByGuestId(guestId);
+                return StatusCode(200, card);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete("{cardId}")]
+        public async Task<IActionResult> DeleteCardById(long cardId)
+        {
+            try
+            {
+                await _cardService.DeleteCardById(cardId);
+                return StatusCode(200, "Карта успешно удалена");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
