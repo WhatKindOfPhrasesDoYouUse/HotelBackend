@@ -6,5 +6,6 @@
         public string? CardNumber { get; set; }
         public string? CardDate { get; set; }
         public string? BankName { get; set; }
+        public long? BankId { get; set; }
     }
 }

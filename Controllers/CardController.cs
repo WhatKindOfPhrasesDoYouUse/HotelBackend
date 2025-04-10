@@ -1,4 +1,5 @@
 ﻿using HotelBackend.Contracts;
+using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +43,7 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpGet("{guestId}/guest")]
+        [HttpGet("{guestId:long}/guest")]
         public async Task<IActionResult> GetCardByGuestIdEndpoint(long guestId)
         {
             try
@@ -60,7 +61,7 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpDelete("{cardId}")]
+        [HttpDelete("{cardId:long}")]
         public async Task<IActionResult> DeleteCardById(long cardId)
         {
             try
@@ -75,6 +76,42 @@ namespace HotelBackend.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPatch("{cardId:long}")]
+        public async Task<IActionResult> UpdateCard(long cardId, CardDto cardDto)
+        {
+            try
+            {
+                await _cardService.UpdateCard(cardId, cardDto);
+                return StatusCode(200, "Данные карты успешно обновлены");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("{cardId:long}")]
+        public async Task<IActionResult> GetCardById(long cardId)
+        {
+            try
+            {
+                var card = await _cardService.GetCardById(cardId);
+                return StatusCode(200, card);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла ошибка при получении данных карты: {ex.Message}");
             }
         }
     }
