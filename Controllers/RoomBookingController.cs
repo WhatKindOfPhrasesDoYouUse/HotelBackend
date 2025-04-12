@@ -1,5 +1,6 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.Exceptions;
+using HotelBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -41,6 +42,24 @@ namespace HotelBackend.Controllers
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveRoomBooking(RoomBooking roomBooking)
+        {
+            try
+            {
+                var resultRoomBooking = await _roomBookingService.SaveRoomBooking(roomBooking);
+                return StatusCode(200, roomBooking);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { mewssage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при обработке запроса", details = ex.Message });
             }
         }
     }

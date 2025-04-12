@@ -1,5 +1,4 @@
-﻿using HotelBackend.Exceptions;
-using HotelBackend.Models;
+﻿using HotelBackend.Models;
 
 namespace HotelBackend.Contracts
 {
@@ -7,6 +6,6 @@ namespace HotelBackend.Contracts
     {
         Task<IEnumerable<RoomBooking>> GetAllRoomBookings();
         Task<IEnumerable<RoomBooking>> GetRoomBookingsByGuestId(long guestId);
-        /*Task<RoomBooking> SaveRoomBooking(RoomBooking roomBooking);*/
+        Task<RoomBooking> SaveRoomBooking(RoomBooking roomBooking);
     }
 }

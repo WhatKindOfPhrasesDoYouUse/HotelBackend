@@ -70,13 +70,13 @@ namespace HotelBackend.Services
             }
         }
 
-       /* public async Task<RoomBooking> SaveRoomBooking(RoomBooking roomBooking)
+        public async Task<RoomBooking> SaveRoomBooking(RoomBooking roomBooking)
         {
             try
             {
                 if (roomBooking.GuestId <= 0)
                 {
-                    throw new ServiceException(ErrorCode.BadRequest, "id гостя не может быть меньше или равно нулю");
+                    throw new ServiceException(ErrorCode.BadRequest, "id гостя не может быть меньше или равен 0");
                 }
 
                 if (await _context.Guests.FindAsync(roomBooking.GuestId) == null)
@@ -94,8 +94,34 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {roomBooking.RoomId} не найден");
                 }
 
-                // доделать логику бронирования комнаты, с наложением дат. И проверкой что In дата раньше чем out.
+                if (roomBooking.CheckInDate.ToDateTime(roomBooking.CheckInTime) >= roomBooking.CheckOutDate.ToDateTime(roomBooking.CheckOutTime))
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Дата и время заезда должны быть позде даты и времени бронирования");
+                }
+
+                bool isOverlappingBookingExists = await _context.RoomBookings.
+                    AnyAsync(rb => rb.RoomId == roomBooking.RoomId
+                    && rb.Id != roomBooking.Id
+                    && roomBooking.CheckInDate <= rb.CheckOutDate && roomBooking.CheckOutDate >= rb.CheckInDate);
+
+                if (isOverlappingBookingExists)
+                {
+                    throw new ServiceException(ErrorCode.Conflict, "Комната уже забронирована на указанный период");
+                }
+
+                _context.RoomBookings.Add(roomBooking);
+                await _context.SaveChangesAsync();
+
+                return roomBooking;
             }
-        }*/
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, $"Произошла ошибка со стороны сервера при создании бронирования: {ex}");
+            }
+        } 
     }
 }
