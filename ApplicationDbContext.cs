@@ -470,6 +470,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.CheckOutTime).HasColumnName("check_out_time");
             entity.Property(e => e.GuestId).HasColumnName("guest_id"); 
             entity.Property(e => e.RoomId).HasColumnName("room_id");
+            entity.Property(e => e.NumberOfGuests).HasColumnName("number_of_guests");
 
             entity.HasOne(d => d.Guest).WithMany(p => p.RoomBookings)
                 .HasForeignKey(d => d.GuestId)

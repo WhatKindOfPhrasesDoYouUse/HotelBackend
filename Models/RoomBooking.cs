@@ -28,6 +28,11 @@ public partial class RoomBooking
     [Required(ErrorMessage = "Поле CheckOutTime модели RoomBooking является обязательным")]
     public TimeOnly CheckOutTime { get; set; }
 
+    [Column(name: "number_of_guests")]
+    [Required(ErrorMessage = "Поле NumberOfGuests модели RoomBooking является обязательным")]
+    [Range(1, int.MaxValue, ErrorMessage = "Количество гостей должно быть больше 0")]
+    public int NumberOfGuests { get; set; }
+
     [Column(name: "guest_id")]
     [Required(ErrorMessage = "Поле QuestId модели RoomBooking является обязательным")]
     public long GuestId { get; set; }

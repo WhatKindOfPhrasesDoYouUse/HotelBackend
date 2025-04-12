@@ -99,6 +99,13 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.BadRequest, "Дата и время заезда должны быть позде даты и времени бронирования");
                 }
 
+                var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == roomBooking.RoomId);
+
+                if (roomBooking.NumberOfGuests > room.Capacity)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"Количество желаемых мест: {roomBooking.NumberOfGuests} должно быть меньше {room.Capacity}");
+                }
+
                 bool isOverlappingBookingExists = await _context.RoomBookings.
                     AnyAsync(rb => rb.RoomId == roomBooking.RoomId
                     && rb.Id != roomBooking.Id
