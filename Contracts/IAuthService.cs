@@ -6,5 +6,6 @@ namespace HotelBackend.Contracts
     {
         Task<string> Login(AuthDto authDto);
         Task<string> RegistrationGuest(RegistrationGuestDto registrationGuestDto);
+        Task<bool> ClientVerification(VerificationDto verificationDto);
     }
 }

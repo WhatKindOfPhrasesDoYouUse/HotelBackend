@@ -169,5 +169,36 @@ namespace HotelBackend.Services
                 throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при обновлении пароля.", ex);
             }
         }
+
+        public async Task DeleteClientByGuestId(long guestId)
+        {
+            try
+            {
+                var guest = await _context.Guests.FindAsync(guestId);
+
+                if (guest == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Гостя с id: {guestId} не существует");
+                }
+
+                var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == guest.ClientId);
+
+                if (client == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Клиента с id: {guest.ClientId} не существует");
+                }
+
+                _context.Clients.Remove(client);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

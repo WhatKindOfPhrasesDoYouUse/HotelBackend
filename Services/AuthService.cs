@@ -141,10 +141,38 @@ namespace HotelBackend.Services
                 await _context.SaveChangesAsync();
 
                 return "Регистрация прошла успешно";
-            } 
+            }
             catch (ServiceException ex)
             {
                 throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при регистрации", ex);
+            }
+        }
+
+        public async Task<bool> ClientVerification(VerificationDto verificationDto)
+        {
+            try
+            {
+                if (verificationDto.ClientId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id клиента не может быть нулем или отрицательным числом");
+                }
+
+                var client = await _context.Clients.FindAsync(verificationDto.ClientId);
+
+                if (client == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Клиент с ID {verificationDto.ClientId} не найден");
+                }
+
+                return VerifyPassword(client, verificationDto.Password);
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

@@ -2,8 +2,8 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchBrowser": false,
+      "launchUrl": "api/hotels",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

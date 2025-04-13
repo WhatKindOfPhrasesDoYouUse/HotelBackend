@@ -91,5 +91,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
             }
         }
+
+        [HttpDelete("{guestId}/guest")]
+        public async Task<IActionResult> DeleteClientByGuestId(long guestId)
+        {
+            try
+            {
+                await _clientService.DeleteClientByGuestId(guestId);
+                return StatusCode(200);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new {error = ex.Message});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Внутренняя ошибка сервера: {ex.Message}" });
+            }
+        }
     }
 }

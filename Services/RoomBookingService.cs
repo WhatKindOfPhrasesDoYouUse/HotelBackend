@@ -99,6 +99,11 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.BadRequest, "Дата и время заезда должны быть позде даты и времени бронирования");
                 }
 
+                if (roomBooking.CheckInDate < DateOnly.FromDateTime(DateTime.Now))
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Дата заселения не может быть раньше текущей даты");
+                }
+
                 var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == roomBooking.RoomId);
 
                 if (roomBooking.NumberOfGuests > room.Capacity)
@@ -125,9 +130,9 @@ namespace HotelBackend.Services
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new ServiceException(ErrorCode.InternalServerError, $"Произошла ошибка со стороны сервера при создании бронирования: {ex}");
+                throw;
             }
         } 
     }

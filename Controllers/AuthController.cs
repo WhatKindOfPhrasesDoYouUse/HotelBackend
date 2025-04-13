@@ -55,5 +55,30 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpPost("verify-client")]
+        public async Task<IActionResult> ClientVerification([FromBody] VerificationDto verificationDto)
+        {
+            try
+            {
+                var isValid = await _authService.ClientVerification(verificationDto);
+                if (isValid)
+                {
+                    return StatusCode(200, isValid);
+                }
+                else
+                {
+                    return StatusCode(401, isValid);
+                }
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
     }
 }
