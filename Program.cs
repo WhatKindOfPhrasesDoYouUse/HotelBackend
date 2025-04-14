@@ -40,6 +40,7 @@ builder.Services.AddScoped<IGuestService, GuestService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IRoomBookingService,  RoomBookingService>();
 builder.Services.AddScoped<IBankService, BankService>();
+builder.Services.AddScoped<IRoomPaymentService, RoomPaymentService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
