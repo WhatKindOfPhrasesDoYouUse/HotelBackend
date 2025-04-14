@@ -12,7 +12,6 @@ namespace HotelBackend.Services
 
         public RoomPaymentService(ApplicationDbContext context) => this._context = context;
 
-
         private decimal CalculateBookingCost(RoomBooking roomBooking)
         {
             if (roomBooking == null)
@@ -48,6 +47,11 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.BadRequest, $"id бронирования не может быть меньше или равно 0");
                 }
                 
+                if (await _context.RoomPayments.FirstOrDefaultAsync(rp => rp.RoomBookingId == roomPaymentDto.RoomBookingId) != null)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"Оплата для бронирования с id: {roomPaymentDto.RoomBookingId} уже существует");
+                }
+
                 var booking = await _context.RoomBookings
                     .Include(b => b.Room)
                     .FirstOrDefaultAsync(b => b.Id == roomPaymentDto.RoomBookingId);
