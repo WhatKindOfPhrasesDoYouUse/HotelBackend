@@ -1,4 +1,5 @@
 ﻿using HotelBackend.Contracts;
+using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,120 @@ namespace HotelBackend.Services
             }
         }
 
+        public async Task<IEnumerable<RoomBookingDto>> GetDetailedRoomBookingByGuestId(long guestId)
+        {
+            try
+            {
+                if (guestId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id гостя не может быть меньше или равно нулю");
+                }
+
+                if (await _context.Guests.FindAsync(guestId) == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Гость с id: {guestId} не найден");
+                }
+
+                var bookings = await _context.RoomBookings
+                    .Include(rb => rb.Room)
+                    .Where(rb => rb.GuestId == guestId)
+                    .ToListAsync();
+
+                if (bookings == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирования для гостя с id: {guestId} не найдены");
+                }
+
+                var paidBookingIds = await _context.RoomPayments
+                    .Where(rp => bookings.Select(b => b.Id).Contains(rp.RoomBookingId))
+                    .Select(rp => rp.RoomBookingId)
+                    .ToListAsync();
+
+                var bookingDtos = bookings.Select(booking =>
+                {
+                    var cancelUntilDate = booking.CheckInDate != null
+                        ? booking.CheckInDate.AddDays(-1)
+                        : (DateOnly?)null;
+
+                    var cancelUntilTime = booking.CheckInTime != null
+                        ? booking.CheckInTime 
+                        : new TimeOnly(14, 0); 
+
+                    return new RoomBookingDto
+                    {
+                        RoomBookingId = booking.Id,
+                        CheckInDate = booking.CheckInDate,
+                        CheckOutDate = booking.CheckOutDate,
+                        CheckInTime = booking.CheckInTime,
+                        CheckOutTime = booking.CheckOutTime,
+                        Capacity = booking.Room?.Capacity,
+                        NumberOfGuests = booking.NumberOfGuests,
+                        UnitPrice = booking.Room?.UnitPrice,
+                        RoomNumber = booking.Room?.RoomNumber,
+                        CancelUntilDate = cancelUntilDate,
+                        CancelUntilTime = cancelUntilTime,
+                        IsPayd = paidBookingIds.Contains(booking.Id)
+                    };
+                });
+
+                return bookingDtos;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+    
+                throw;
+            }
+        }
+
+        public async Task DeleteBookingById(long bookingId)
+        {
+            try
+            {
+                if (bookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id бронирования не может быть меньше или равно нулю");
+                }
+
+                var booking = await _context.RoomBookings.FirstOrDefaultAsync(b => b.Id == bookingId);
+
+                if (booking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирование с id: {bookingId} не найдено");
+                }
+
+                if (booking.CheckInDate == default)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Дата заезда не установлена.");
+                }
+
+                var cancelUntilDate = booking.CheckInDate.AddDays(-1);
+                var cancelUntilTime = booking.CheckInTime == default ? new TimeOnly(14, 0) : booking.CheckInTime;
+
+                var currentDateTime = DateTime.UtcNow;
+                var cancelUntilDateTime = cancelUntilDate.ToDateTime(cancelUntilTime);
+
+                if (currentDateTime > cancelUntilDateTime)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Срок для отмены бронирования прошел.");
+                }
+
+                _context.RoomBookings.Remove(booking);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<RoomBooking> SaveRoomBooking(RoomBooking roomBooking)
         {
             try
@@ -134,6 +249,6 @@ namespace HotelBackend.Services
             {
                 throw;
             }
-        } 
+        }
     }
 }

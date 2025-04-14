@@ -27,7 +27,7 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpGet("by-guest/{guestId}")]
+        [HttpGet("by-guest/{guestId:long}")]
         public async Task<IActionResult> GetRoomBookingsByGuestId(long guestId)
         {
             try
@@ -42,6 +42,42 @@ namespace HotelBackend.Controllers
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        [HttpGet("{guestId:long}/guest")]
+        public async Task<IActionResult> GetDetailedRoomBookingByGuestId(long guestId)
+        {
+            try
+            {
+                var roomBookingDtos = await _roomBookingService.GetDetailedRoomBookingByGuestId(guestId);
+                return StatusCode(200, roomBookingDtos);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{bookingId:long}")]
+        public async Task<IActionResult> DeleteBookingById(long bookingId)
+        {
+            try
+            {
+                await _roomBookingService.DeleteBookingById(bookingId);
+                return StatusCode(200, "Бронирование успешно удалено");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
 
