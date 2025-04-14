@@ -46,15 +46,13 @@ public partial class AmenityBooking
     public TimeOnly OrderTime { get; set; }
 
     [Column(name: "ready_date")]
-    [Required(ErrorMessage = "Поле ReadyDate модели AmenityBooking является обязательным")]
-    public DateOnly ReadyDate { get; set; }
+    public DateOnly? ReadyDate { get; set; }
 
     [Column(name: "ready_time")]
-    [Required(ErrorMessage = "Поле ReadyTime модели AmenityBooking является обязательным")]
-    public TimeOnly ReadyTime { get; set; }
+    public TimeOnly? ReadyTime { get; set; }
 
     [Column(name: "completion_status")]
-    [Required(ErrorMessage = "Поле CompletionStatus модели AmenityBooking является обязательным")]
+    [Required(ErrorMessage = "Поле CompletionSt1atus модели AmenityBooking является обязательным")]
     public string CompletionStatus { get; set; } = "В ожидании подтверждения";
 
     [Column(name: "quantity")]

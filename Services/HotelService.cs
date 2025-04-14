@@ -21,7 +21,6 @@ namespace HotelBackend.Services
                 var hotels = await _context.Hotels
                     .Include(h => h.HotelType)
                         .ThenInclude(ht => ht.Hotels)
-                    .Include(h => h.Employees)
                     .Include(h => h.HotelReviews)
                     .Include(h => h.Rooms)
                     .ToListAsync();

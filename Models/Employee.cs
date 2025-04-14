@@ -11,7 +11,7 @@ public partial class Employee
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
-    [Column(name: "hire_date")]
+/*    [Column(name: "hire_date")]
     [Required(ErrorMessage = "Поле HireDate модели Employee является обязательным")]
     [DataType(DataType.Date)]
     public DateOnly HireDate { get; set; }
@@ -19,7 +19,7 @@ public partial class Employee
     [Column(name: "base_salary")]
     [Required(ErrorMessage = "Поле BaseSalary модели Employee является обязательным")]
     [Range(0, 9999999.99, ErrorMessage = "Значение BaseSalary должно быть положительным числом и не превышать 9999999.99")]
-    public decimal BaseSalary { get; set; }
+    public decimal BaseSalary { get; set; }*/
 
     [Column(name: "employee_type_id")]
     [Required(ErrorMessage = "Поле EmployeeTypeId модели Employee является обязательным")]
@@ -28,11 +28,11 @@ public partial class Employee
     [ForeignKey(nameof(EmployeeTypeId))]
     public virtual EmployeeType EmployeeType { get; set; } = null!;
 
-    [Column(name: "work_schedule_id")]
+/*    [Column(name: "work_schedule_id")]
     public long? WorkScheduleId { get; set; }
 
     [ForeignKey(nameof(WorkScheduleId))]
-    public virtual WorkSchedule? WorkSchedule { get; set; }
+    public virtual WorkSchedule? WorkSchedule { get; set; }*/
 
 
     [Column(name: "client_id")]

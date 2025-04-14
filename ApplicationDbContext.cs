@@ -252,13 +252,13 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("employee", "core");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.BaseSalary)
+/*            entity.Property(e => e.BaseSalary)
                 .HasPrecision(10, 2)
-                .HasColumnName("base_salary");
+                .HasColumnName("base_salary");*/
             entity.Property(e => e.ClientId).HasColumnName("client_id");
             entity.Property(e => e.EmployeeTypeId).HasColumnName("employee_type_id");
-            entity.Property(e => e.HireDate).HasColumnName("hire_date");
-            entity.Property(e => e.WorkScheduleId).HasColumnName("work_schedule_id");
+/*            entity.Property(e => e.HireDate).HasColumnName("hire_date");
+            entity.Property(e => e.WorkScheduleId).HasColumnName("work_schedule_id");*/
             entity.Property(e => e.HotelId).HasColumnName("hotel_id");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Employees)
@@ -270,10 +270,10 @@ public partial class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("employee_employee_type_id_fkey");
 
-            entity.HasOne(d => d.WorkSchedule).WithMany(p => p.Employees)
+/*            entity.HasOne(d => d.WorkSchedule).WithMany(p => p.Employees)
                 .HasForeignKey(d => d.WorkScheduleId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("employee_work_schedule_id_fkey");
+                .HasConstraintName("employee_work_schedule_id_fkey");*/
 
             entity.HasOne(d => d.Hotel).WithMany(p => p.Employees)
                 .HasForeignKey(d => d.HotelId)
