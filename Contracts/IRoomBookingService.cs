@@ -10,5 +10,6 @@ namespace HotelBackend.Contracts
         Task<IEnumerable<RoomBookingDto>> GetDetailedRoomBookingByGuestId(long guestId);
         Task DeleteBookingById(long bookindId);
         Task<RoomBooking> SaveSingleRoomBooking(RoomBooking roomBooking);
+        Task<RoomBooking> ConfirmSingleRoomBooking(long bookingId);
     }
 }

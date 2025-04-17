@@ -98,5 +98,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { message = "Произошла ошибка при обработке запроса", details = ex.Message });
             }
         }
+
+        [HttpPatch("{bookindId:long}/confirm")]
+        public async Task<IActionResult> ConfirmSingleRoomBooking(long bookindId)
+        {
+            try
+            {
+                var booking = await _roomBookingService.ConfirmSingleRoomBooking(bookindId);
+                return StatusCode(200, booking);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при обработке запроса", details = ex.Message });
+            }
+        }
     }
 }

@@ -484,6 +484,10 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.RoomId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("room_booking_room_id_fkey");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         modelBuilder.Entity<RoomPayment>(entity =>

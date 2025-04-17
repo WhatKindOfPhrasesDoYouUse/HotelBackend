@@ -247,10 +247,46 @@ namespace HotelBackend.Services
                 }
 
                 roomBooking.AdditionalGuests = null;
+                roomBooking.CreatedAt = DateTime.UtcNow;
+
                 _context.RoomBookings.Add(roomBooking);
                 await _context.SaveChangesAsync();
 
                 return roomBooking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<RoomBooking> ConfirmSingleRoomBooking(long bookingId)
+        {
+            try
+            {
+                if (bookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id бронирования не может быть меньше или равно нулю");
+                }
+
+                var booking = await _context.RoomBookings.FindAsync(bookingId);
+
+                if (booking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирование с id: {bookingId} не найдено");
+                }
+
+                booking.IsConfirmed = true;
+                booking.ConfirmationTime = DateTime.UtcNow;
+
+                _context.RoomBookings.Update(booking);
+                await _context.SaveChangesAsync();
+
+                return booking;
             }
             catch (ServiceException)
             {

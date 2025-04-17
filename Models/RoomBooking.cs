@@ -33,6 +33,9 @@ public partial class RoomBooking
     [Range(1, int.MaxValue, ErrorMessage = "Количество гостей должно быть больше 0")]
     public int NumberOfGuests { get; set; }
 
+    [Column(name: "created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     [Column(name: "is_confirmed")]
     public bool IsConfirmed { get; set; } = false;
 

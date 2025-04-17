@@ -44,6 +44,10 @@ builder.Services.AddScoped<IRoomPaymentService, RoomPaymentService>();
 builder.Services.AddScoped<IPaymentTypeService, PaymentTypeService>();
 builder.Services.AddScoped<IAmenityService, AmenityService>();
 builder.Services.AddScoped<IAmenityBookingService, AmenityBookingService>();
+builder.Services.AddScoped<CleanupRoomBookingService>();
+
+// регистрация фоновых задач
+builder.Services.AddHostedService<CleanupRoomBookingService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
