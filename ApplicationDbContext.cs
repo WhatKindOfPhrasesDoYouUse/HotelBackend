@@ -53,6 +53,7 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<WorkSchedule> WorkSchedules { get; set; }
 
     public virtual DbSet<RoomComfort> RoomsComforts { get; set; }
+    public virtual DbSet<AdditionalGuest> AdditionalGuests { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -522,6 +523,62 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.StartTime).HasColumnName("start_time");
             entity.Property(e => e.WorkDate).HasColumnName("work_date");
         });
+
+        modelBuilder.Entity<AdditionalGuest>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("additional_guest_pkey");
+
+            entity.ToTable("additional_guest", "core");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnName("name");
+
+            entity.Property(e => e.Surname)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasColumnName("surname");
+
+            entity.Property(e => e.Patronymic)
+                .HasMaxLength(50)
+                .HasColumnName("patronymic");
+
+            entity.Property(e => e.PassportSeriesHash)
+                .IsRequired()
+                .HasMaxLength(150)
+                .HasColumnName("passport_series_hash");
+
+            entity.Property(e => e.PassportNumberHash)
+                .IsRequired()
+                .HasMaxLength(150)
+                .HasColumnName("passport_number_hash");
+
+            entity.Property(e => e.DateOfBirth)
+                .IsRequired()
+                .HasColumnName("date_of_birth");
+
+            entity.Property(e => e.RoomBookingId)
+                .IsRequired()
+                .HasColumnName("room_booking_id");
+
+            entity.Property(e => e.GuestId)
+                .HasColumnName("guest_id");
+
+            entity.HasOne(e => e.RoomBooking)
+                .WithMany(rb => rb.AdditionalGuests)
+                .HasForeignKey(e => e.RoomBookingId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("additional_guest_room_booking_id_fkey");
+
+            entity.HasOne(e => e.Guest)
+                .WithMany()
+                .HasForeignKey(e => e.GuestId)
+                .HasConstraintName("additional_guest_guest_id_fkey");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

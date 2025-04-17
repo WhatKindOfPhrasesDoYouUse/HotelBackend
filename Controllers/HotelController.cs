@@ -23,15 +23,7 @@ namespace HotelBackend.Controllers
             }
             catch (ServiceException ex) 
             {
-                switch (ex.ErrorCode)
-                {
-                    case ErrorCode.NotFound:
-                        return NotFound(new { message = ex.Message });
-                    case ErrorCode.InternalServerError:
-                        return StatusCode(500, new { message = ex.Message, details = ex.InnerException?.Message });
-                    default:
-                        return StatusCode(500, new { message = "Неизвестная ошибка", details = ex.Message });
-                }
+                return StatusCode((int)ex.ErrorCode, ex.Message);
             }
             catch (Exception ex)
             {

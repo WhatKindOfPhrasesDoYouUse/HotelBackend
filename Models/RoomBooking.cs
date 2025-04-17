@@ -48,4 +48,5 @@ public partial class RoomBooking
     public virtual Room? Room { get; set; } = null!;
 
     public virtual ICollection<RoomPayment> RoomPayments { get; set; } = new List<RoomPayment>();
+    public virtual ICollection<AdditionalGuest> AdditionalGuests { get; set; } = new List<AdditionalGuest>();
 }
