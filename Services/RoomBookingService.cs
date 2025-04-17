@@ -123,7 +123,10 @@ namespace HotelBackend.Services
                         RoomNumber = booking.Room?.RoomNumber,
                         CancelUntilDate = cancelUntilDate,
                         CancelUntilTime = cancelUntilTime,
-                        IsPayd = paidBookingIds.Contains(booking.Id)
+                        IsPayd = paidBookingIds.Contains(booking.Id),
+                        CreatedAt = booking.CreatedAt,
+                        IsConfirmed = booking.IsConfirmed,
+                        ConfirmationTime = booking.ConfirmationTime
                     };
                 });
 
@@ -287,6 +290,60 @@ namespace HotelBackend.Services
                 await _context.SaveChangesAsync();
 
                 return booking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateSingleRoomBookingId(long bookingId, UpdateRoomBookingDto updateRoomBookingDto)
+        {
+            try
+            {
+                if (bookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id бронирования не может быть меньше или равно нулю");
+                }
+                var booking = await _context.RoomBookings.FindAsync(bookingId);
+
+                if (booking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирование с id: {bookingId} не найдено");
+                }
+
+                if (booking.IsConfirmed)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Нельзя изменить подтвержденное бронирование");
+                }
+
+                var checkInDateTime = booking.CheckInDate.ToDateTime(booking.CheckInTime);
+
+                if (DateTime.UtcNow.AddHours(20) > checkInDateTime)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Изменения запрещены менее чем за 24 часа до заезда.");
+                }
+
+                if (updateRoomBookingDto.CheckInDate.HasValue)
+                    booking.CheckInDate = updateRoomBookingDto.CheckInDate.Value;
+
+                if (updateRoomBookingDto.CheckOutDate.HasValue)
+                    booking.CheckOutDate = updateRoomBookingDto.CheckOutDate.Value;
+
+                if (updateRoomBookingDto.CheckInTime.HasValue)
+                    booking.CheckInTime = updateRoomBookingDto.CheckInTime.Value;
+
+                if (updateRoomBookingDto.CheckOutTime.HasValue)
+                    booking.CheckOutTime = updateRoomBookingDto.CheckOutTime.Value;
+
+                booking.NumberOfGuests = 1;
+
+                _context.RoomBookings.Update(booking);
+                await _context.SaveChangesAsync();
             }
             catch (ServiceException)
             {

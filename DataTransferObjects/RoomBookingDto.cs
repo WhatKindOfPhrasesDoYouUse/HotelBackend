@@ -14,5 +14,8 @@
         public long? UnitPrice { get; set; }
         public int? RoomNumber { get; set; }
         public bool? IsPayd { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public bool? IsConfirmed { get; set; }
+        public DateTime? ConfirmationTime { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HotelBackend.Contracts;
+using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -106,6 +107,24 @@ namespace HotelBackend.Controllers
             {
                 var booking = await _roomBookingService.ConfirmSingleRoomBooking(bookindId);
                 return StatusCode(200, booking);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при обработке запроса", details = ex.Message });
+            }
+        }
+
+        [HttpPatch("{bookingId:long}/update-single")]
+        public async Task<IActionResult> UpdateSingleRoomBookingId(long bookingId, UpdateRoomBookingDto updateRoomBookingDto)
+        {
+            try
+            {
+                await _roomBookingService.UpdateSingleRoomBookingId(bookingId, updateRoomBookingDto);
+                return StatusCode(200, "Бронирование комнаты успешно обновлено");
             }
             catch (ServiceException ex)
             {

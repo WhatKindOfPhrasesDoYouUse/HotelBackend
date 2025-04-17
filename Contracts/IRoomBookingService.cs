@@ -11,5 +11,6 @@ namespace HotelBackend.Contracts
         Task DeleteBookingById(long bookindId);
         Task<RoomBooking> SaveSingleRoomBooking(RoomBooking roomBooking);
         Task<RoomBooking> ConfirmSingleRoomBooking(long bookingId);
+        Task UpdateSingleRoomBookingId(long bookingId, UpdateRoomBookingDto updateRoomBookingDto);
     }
 }
