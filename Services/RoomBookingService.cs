@@ -185,7 +185,7 @@ namespace HotelBackend.Services
             }
         }
 
-        public async Task<RoomBooking> SaveRoomBooking(RoomBooking roomBooking)
+        public async Task<RoomBooking> SaveSingleRoomBooking(RoomBooking roomBooking)
         {
             try
             {
@@ -221,6 +221,16 @@ namespace HotelBackend.Services
 
                 var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == roomBooking.RoomId);
 
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комнаты с id: {roomBooking.RoomId} не существует");
+                }
+
+                if (room.Capacity > 1)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Комната расчитана на 1 гостя");
+                }
+
                 if (roomBooking.NumberOfGuests > room.Capacity)
                 {
                     throw new ServiceException(ErrorCode.BadRequest, $"Количество желаемых мест: {roomBooking.NumberOfGuests} должно быть меньше {room.Capacity}");
@@ -236,6 +246,7 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.Conflict, "Комната уже забронирована на указанный период");
                 }
 
+                roomBooking.AdditionalGuests = null;
                 _context.RoomBookings.Add(roomBooking);
                 await _context.SaveChangesAsync();
 

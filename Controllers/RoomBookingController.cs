@@ -86,7 +86,7 @@ namespace HotelBackend.Controllers
         {
             try
             {
-                var resultRoomBooking = await _roomBookingService.SaveRoomBooking(roomBooking);
+                var resultRoomBooking = await _roomBookingService.SaveSingleRoomBooking(roomBooking);
                 return StatusCode(200, roomBooking);
             }
             catch (ServiceException ex)

@@ -473,6 +473,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.RoomId).HasColumnName("room_id");
             entity.Property(e => e.NumberOfGuests).HasColumnName("number_of_guests");
 
+            entity.Property(e => e.IsConfirmed).HasColumnName("is_confirmed").HasDefaultValue(false);
+            entity.Property(e => e.ConfirmationTime).HasColumnName("confirmation_time");
+
             entity.HasOne(d => d.Guest).WithMany(p => p.RoomBookings)
                 .HasForeignKey(d => d.GuestId)
                 .HasConstraintName("room_booking_guest_id_fkey");
@@ -578,7 +581,6 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.GuestId)
                 .HasConstraintName("additional_guest_guest_id_fkey");
         });
-
 
         OnModelCreatingPartial(modelBuilder);
     }

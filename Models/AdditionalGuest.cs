@@ -43,7 +43,7 @@ namespace HotelBackend.Models
 
         [Column(name: "room_booking_id")]
         [Required(ErrorMessage = "Поле RoomBookingId модели AdditionalGuest является обязательным")]
-        public int RoomBookingId { get; set; }
+        public long RoomBookingId { get; set; }
 
         [ForeignKey(nameof(RoomBookingId))]
         public virtual RoomBooking RoomBooking { get; set; } = null!;
