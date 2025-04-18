@@ -15,7 +15,7 @@ public class CleanupRoomBookingService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await CleanupBookings(stoppingToken);
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);  
+            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
 
