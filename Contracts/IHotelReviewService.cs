@@ -8,5 +8,6 @@ namespace HotelBackend.Contracts
         Task<HotelReview> GetHotelReviewByGuestId(long guestId);
         Task SaveHotelReview(HotelReview hotelReview);
         Task DeleteHotelReviewById(long hotelReviewId);
+        Task<HotelReview> UpdateHotelReview(long hotelReviewId, HotelReview newHotelReview);
     }
 }

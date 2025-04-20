@@ -85,5 +85,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
+
+        [HttpPatch("{hotelReviewId:long}")]
+        public async Task<IActionResult> UpdateHotelReview(long hotelReviewId, HotelReview newHotelReview)
+        {
+            try
+            {
+                var hotelReview = await _hotelReviewService.UpdateHotelReview(hotelReviewId, newHotelReview);
+                return StatusCode(200, hotelReview);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
     }
 }

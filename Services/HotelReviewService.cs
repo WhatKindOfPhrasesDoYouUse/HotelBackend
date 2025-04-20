@@ -103,6 +103,11 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.BadRequest, "Гость не имеет завершённых бронирований в этом отеле");
                 }
 
+                if (hotelReview.Rating < 1 || hotelReview.Rating > 5)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Рейтинг должен быть в интервале от 1 до 5");
+                }
+
                 var reviewedBooking = await _context.HotelReviews
                     .Where(hr => hr.GuestId == hotelReview.GuestId && hr.HotelId == hotelReview.HotelId && hr.RoomBookingId == hotelReview.RoomBookingId)
                     .FirstOrDefaultAsync();
@@ -156,6 +161,56 @@ namespace HotelBackend.Services
 
                 _context.Remove(hotelReview);
                 await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<HotelReview> UpdateHotelReview(long hotelReviewId, HotelReview newHotelReview)
+        {
+            try
+            {
+                if (hotelReviewId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id отзыва не должно быть меньше или равно 0");
+                }
+
+                var hotelReview = await _context.HotelReviews.FindAsync(hotelReviewId);
+
+                if (hotelReview == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Отзыв с id: {hotelReviewId} не найден");
+                }
+
+                if (hotelReview.Rating < 1 || hotelReview.Rating > 5)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Рейтинг должен быть в интервале от 1 до 5");
+                }
+
+                if (!string.IsNullOrEmpty(newHotelReview.Comment))
+                {
+                    hotelReview.Comment = newHotelReview.Comment;
+                }
+
+                if (newHotelReview.Rating >= 1 && newHotelReview.Rating <= 5)
+                {
+                    hotelReview.Rating = newHotelReview.Rating;
+                }
+
+                hotelReview.PublicationDate = DateOnly.FromDateTime(DateTime.Now);
+                hotelReview.PublicationTime = TimeOnly.FromDateTime(DateTime.Now);
+
+
+                _context.HotelReviews.Update(hotelReview);
+                await _context.SaveChangesAsync();
+
+                return hotelReview;
             }
             catch (ServiceException)
             {
