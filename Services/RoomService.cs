@@ -176,5 +176,33 @@ namespace HotelBackend.Services
                 throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка со стороны сервера при фильтрации данных", ex);
             }
         }
+
+        public async Task<Room> GetRoomById(long roomId)
+        {
+            try
+            {
+                if (roomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id комнаты не может быть меньше или равно 0");
+                }
+
+                var room = await _context.Rooms.FindAsync(roomId);
+
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {roomId} не найдена");
+                }
+
+                return room;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
