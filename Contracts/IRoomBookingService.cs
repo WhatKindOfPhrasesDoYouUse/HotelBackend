@@ -13,5 +13,6 @@ namespace HotelBackend.Contracts
         Task<RoomBooking> SaveGroupRoomBooking(RoomBooking roomBooking);
         Task<RoomBooking> ConfirmSingleRoomBooking(long bookingId);
         Task UpdateSingleRoomBookingId(long bookingId, UpdateRoomBookingDto updateRoomBookingDto);
+        Task UpdateAdditionalGuestByRoomBookingId(long bookindId, List<AdditionalGuest> additionalGuest);
     }
 }

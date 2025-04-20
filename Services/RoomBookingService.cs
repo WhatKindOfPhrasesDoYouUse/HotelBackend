@@ -449,5 +449,58 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task UpdateAdditionalGuestByRoomBookingId(long bookingId, List<AdditionalGuest> additionalGuests)
+        {
+            try
+            {
+                if (bookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Id бронирования должен быть положительным числом");
+                }
+
+                var booking = await _context.RoomBookings
+                    .Include(b => b.AdditionalGuests)
+                    .FirstOrDefaultAsync(b => b.Id == bookingId);
+
+                if (booking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирование с id: {bookingId} не найдено");
+                }
+
+                var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == booking.RoomId);
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {booking.RoomId} не найдена");
+                }
+
+                int totalGuests = additionalGuests?.Count + 1 ?? 1;
+                if (totalGuests > room.Capacity)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"Количество гостей ({totalGuests}) превышает вместимость комнаты ({room.Capacity})");
+                }
+
+                _context.AdditionalGuests.RemoveRange(booking.AdditionalGuests);
+
+                if (additionalGuests != null && additionalGuests.Any())
+                {
+                    foreach (var guest in additionalGuests)
+                    {
+                        guest.RoomBookingId = bookingId;
+                    }
+                    await _context.AdditionalGuests.AddRangeAsync(additionalGuests);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

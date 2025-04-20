@@ -97,5 +97,65 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<RoomPaymentDetailsDto> GetDetailsByBookingId(long bookingId)
+        {
+            try
+            {
+                if (bookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id бронирования не может быть меньше или равно 0");
+                }
+
+                var booking = await _context.RoomBookings
+                    .Include(b => b.Room)
+                    .FirstOrDefaultAsync(b => b.Id == bookingId);
+
+                if (booking == null) 
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирование с id: {bookingId} не существует");
+                }
+
+                if (booking.Room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комнаты c id бронирования: {booking} не существует");
+                }
+
+                var guest = await _context.Guests
+                    .Include(g => g.Card)
+                    .FirstOrDefaultAsync(g => g.Id == booking.GuestId);
+
+                if (guest == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Гостя с id бронирования: {bookingId} не существует");
+                }
+
+                if (guest.Card == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"У гостя с id: {guest.Id} не привязана карта");
+                }
+
+                decimal totalAmount = CalculateBookingCost(booking);
+
+                RoomPaymentDetailsDto roomPaymentDetailsDto = new RoomPaymentDetailsDto
+                {
+                    HotelName = "Три семерки",
+                    NumberRoom = booking.Room.RoomNumber,
+                    TotalAmount = totalAmount,
+                    RoomBooking = booking,
+                    Card = guest.Card
+                };
+
+                return roomPaymentDetailsDto;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

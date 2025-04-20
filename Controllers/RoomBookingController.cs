@@ -153,5 +153,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { message = "Произошла ошибка при обработке запроса", details = ex.Message });
             }
         }
+
+        [HttpPatch("{bookindId:long}/additional-guests")]
+        public async Task<IActionResult> UpdateAdditionalGuestByRoomBookingId(long bookingId, List<AdditionalGuest> additionalGuests)
+        {
+            try
+            {
+                await _roomBookingService.UpdateAdditionalGuestByRoomBookingId(bookingId, additionalGuests);
+                return StatusCode(200, "Данные дополнительных гостей успешно обновлены");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при обработке запроса", details = ex.Message });
+            }
+        }
     }
 }
