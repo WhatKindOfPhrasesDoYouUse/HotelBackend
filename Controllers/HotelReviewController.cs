@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -56,6 +57,24 @@ namespace HotelBackend.Controllers
             {
                 await _hotelReviewService.SaveHotelReview(hotelReview);
                 return StatusCode(200, hotelReview);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{hotelReviewId:long}")]
+        public async Task<IActionResult> DeleteHotelReviewById(long hotelReviewId)
+        {
+            try
+            {
+                await _hotelReviewService.DeleteHotelReviewById(hotelReviewId);
+                return StatusCode(200, "Отзыв успешно удален");
             }
             catch (ServiceException ex)
             {

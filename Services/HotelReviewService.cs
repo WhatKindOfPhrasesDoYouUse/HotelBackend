@@ -137,5 +137,34 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task DeleteHotelReviewById(long hotelReviewId)
+        {
+            try
+            {
+                if (hotelReviewId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id отзыва не должно быть меньше или равно 0");
+                }
+
+                var hotelReview = await _context.HotelReviews.FindAsync(hotelReviewId);
+
+                if (hotelReview == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Отзыв с id: {hotelReviewId} не найден");
+                }
+
+                _context.Remove(hotelReview);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
