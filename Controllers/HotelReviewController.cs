@@ -1,5 +1,6 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.Exceptions;
+using HotelBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -47,5 +48,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
+
+/*        [HttpPost]
+        public async Task<IActionResult> SaveHotelReview(HotelReview hotelReview)
+        {
+            try
+            {
+                await _hotelReviewService.SaveHotelReview(hotelReview);
+                return StatusCode(200, hotelReview);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }*/
     }
 }

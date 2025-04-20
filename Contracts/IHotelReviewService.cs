@@ -6,6 +6,6 @@ namespace HotelBackend.Contracts
     {
         Task<IEnumerable<HotelReview>> GetHotelReviews();
         Task<HotelReview> GetHotelReviewByGuestId(long guestId);
-
+/*        Task SaveHotelReview(HotelReview hotelReview);*/
     }
 }

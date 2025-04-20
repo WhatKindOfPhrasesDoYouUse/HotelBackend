@@ -370,6 +370,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.PublicationDate).HasColumnName("publication_date");
             entity.Property(e => e.PublicationTime).HasColumnName("publication_time");
             entity.Property(e => e.Rating).HasColumnName("rating");
+            entity.Property(e => e.RoomBookingId).HasColumnName("room_booking_id");
 
             entity.HasOne(d => d.Guest).WithMany(p => p.HotelReviews)
                 .HasForeignKey(d => d.GuestId)
@@ -378,6 +379,12 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Hotel).WithMany(p => p.HotelReviews)
                 .HasForeignKey(d => d.HotelId)
                 .HasConstraintName("hotel_review_hotel_id_fkey");
+
+            entity.HasOne(d => d.RoomBooking)
+                .WithOne(p => p.HotelReview)
+                .HasForeignKey<HotelReview>(d => d.RoomBookingId)
+                .HasConstraintName("hotel_review_room_booking_id_fkey")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<HotelType>(entity =>

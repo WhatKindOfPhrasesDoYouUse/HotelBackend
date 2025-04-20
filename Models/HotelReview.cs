@@ -27,6 +27,10 @@ public partial class HotelReview
     [Range(1, 5, ErrorMessage = "Поле Rating модели HotelReview должно быть в пределах от 1 до 5.")]
     public int Rating { get; set; }
 
+    [Column(name: "room_booking_id")]
+    [Required(ErrorMessage = "Поле RoomBookingId модели HotelReview является обязательным")]
+    public long RoomBookingId { get; set; }
+
     [Column(name: "guest_id")]
     [Required(ErrorMessage = "Поле QuestId модели HotelReview является обязательным")]
     public long GuestId { get; set; }
@@ -34,6 +38,8 @@ public partial class HotelReview
     [Column(name: "hotel_id")]
     [Required(ErrorMessage = "Поле HotelId модели HotelReview является обязательным")]
     public long HotelId { get; set; }
+
+    public virtual RoomBooking RoomBooking { get; set; } = null!;
 
     [ForeignKey(nameof(GuestId))]
     public virtual Guest Guest { get; set; } = null!;

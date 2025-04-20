@@ -42,6 +42,8 @@ public partial class RoomBooking
     [Column(name: "confirmation_time")]
     public DateTime? ConfirmationTime { get; set; }
 
+    public virtual HotelReview HotelReview { get; set; } = null!;
+
     [Column(name: "guest_id")]
     [Required(ErrorMessage = "Поле QuestId модели RoomBooking является обязательным")]
     public long GuestId { get; set; }
