@@ -82,12 +82,30 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("single-booking")]
         public async Task<IActionResult> SaveRoomBooking(RoomBooking roomBooking)
         {
             try
             {
                 var resultRoomBooking = await _roomBookingService.SaveSingleRoomBooking(roomBooking);
+                return StatusCode(200, roomBooking);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { mewssage = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при обработке запроса", details = ex.Message });
+            }
+        }
+
+        [HttpPost("group-booking")]
+        public async Task<IActionResult> SaveGroupRoomBooking(RoomBooking roomBooking)
+        {
+            try
+            {
+                var resultRoomBooking = await _roomBookingService.SaveGroupRoomBooking(roomBooking);
                 return StatusCode(200, roomBooking);
             }
             catch (ServiceException ex)

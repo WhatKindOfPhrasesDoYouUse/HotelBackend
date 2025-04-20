@@ -267,6 +267,101 @@ namespace HotelBackend.Services
             }
         }
 
+        public async Task<RoomBooking> SaveGroupRoomBooking(RoomBooking roomBooking)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                if (roomBooking.GuestId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id гостя не может быть меньше или равен 0");
+                }
+
+                var mainGuest = await _context.Guests.FindAsync(roomBooking.GuestId);
+                if (mainGuest == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Гость с id: {roomBooking.GuestId} не найден");
+                }
+
+                if (roomBooking.RoomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id комнаты не может быть меньше или равно нулю");
+                }
+
+                var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == roomBooking.RoomId);
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {roomBooking.RoomId} не найдена");
+                }
+
+                if (room.Capacity < roomBooking.NumberOfGuests)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest,
+                        $"Комната расчитана на {room.Capacity} гостей, а запрошено {roomBooking.NumberOfGuests}");
+                }
+
+                var checkInDateTime = roomBooking.CheckInDate.ToDateTime(roomBooking.CheckInTime);
+                var checkOutDateTime = roomBooking.CheckOutDate.ToDateTime(roomBooking.CheckOutTime);
+
+                if (checkInDateTime >= checkOutDateTime)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Дата и время заезда должны быть раньше даты и времени выезда");
+                }
+
+                if (roomBooking.CheckInDate < DateOnly.FromDateTime(DateTime.Now))
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Дата заезда не может быть раньше текущей даты");
+                }
+
+                bool isOverlappingBookingExists = await _context.RoomBookings.AnyAsync(rb =>
+                    rb.RoomId == roomBooking.RoomId &&
+                    rb.Id != roomBooking.Id &&
+                    roomBooking.CheckInDate <= rb.CheckOutDate &&
+                    roomBooking.CheckOutDate >= rb.CheckInDate);
+
+                if (isOverlappingBookingExists)
+                {
+                    throw new ServiceException(ErrorCode.Conflict, "Комната уже забронирована на указанный период");
+                }
+
+                var additionalGuests = roomBooking.AdditionalGuests?.ToList();
+                roomBooking.AdditionalGuests = null;
+                roomBooking.CreatedAt = DateTime.UtcNow;
+
+                _context.RoomBookings.Add(roomBooking);
+                await _context.SaveChangesAsync();
+
+                if (additionalGuests != null && additionalGuests.Any())
+                {
+                    foreach (var guest in additionalGuests)
+                    {
+                        guest.RoomBookingId = roomBooking.Id;
+                        guest.DateOfBirth = DateTime.SpecifyKind(guest.DateOfBirth, DateTimeKind.Utc);
+                    }
+
+                    _context.AdditionalGuests.AddRange(additionalGuests);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                roomBooking.AdditionalGuests = additionalGuests;
+
+                return roomBooking;
+            }
+            catch (ServiceException)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+
         public async Task<RoomBooking> ConfirmSingleRoomBooking(long bookingId)
         {
             try

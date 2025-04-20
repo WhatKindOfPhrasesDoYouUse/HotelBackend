@@ -42,11 +42,10 @@ namespace HotelBackend.Models
         public DateTime DateOfBirth { get; set; }
 
         [Column(name: "room_booking_id")]
-        [Required(ErrorMessage = "Поле RoomBookingId модели AdditionalGuest является обязательным")]
         public long RoomBookingId { get; set; }
 
         [ForeignKey(nameof(RoomBookingId))]
-        public virtual RoomBooking RoomBooking { get; set; } = null!;
+        public virtual RoomBooking? RoomBooking { get; set; } = null!;
 
         [Column(name: "guest_id")]
         public long? GuestId { get; set; }
