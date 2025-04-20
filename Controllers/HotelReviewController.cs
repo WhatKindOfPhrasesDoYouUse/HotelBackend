@@ -49,7 +49,7 @@ namespace HotelBackend.Controllers
             }
         }
 
-/*        [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> SaveHotelReview(HotelReview hotelReview)
         {
             try
@@ -65,6 +65,6 @@ namespace HotelBackend.Controllers
             {
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
-        }*/
+        }
     }
 }

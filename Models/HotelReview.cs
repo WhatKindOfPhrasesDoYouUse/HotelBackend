@@ -39,11 +39,11 @@ public partial class HotelReview
     [Required(ErrorMessage = "Поле HotelId модели HotelReview является обязательным")]
     public long HotelId { get; set; }
 
-    public virtual RoomBooking RoomBooking { get; set; } = null!;
+    public virtual RoomBooking? RoomBooking { get; set; } = null!;
 
     [ForeignKey(nameof(GuestId))]
-    public virtual Guest Guest { get; set; } = null!;
+    public virtual Guest? Guest { get; set; } = null!;
 
     [ForeignKey(nameof(HotelId))]
-    public virtual Hotel Hotel { get; set; } = null!;
+    public virtual Hotel? Hotel { get; set; } = null!;
 }

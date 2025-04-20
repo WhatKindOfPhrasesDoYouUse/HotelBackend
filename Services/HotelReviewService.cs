@@ -65,7 +65,7 @@ namespace HotelBackend.Services
             }
         }
 
-/*        public async Task SaveHotelReview(HotelReview hotelReview)
+        public async Task SaveHotelReview(HotelReview hotelReview)
         {
             try
             {
@@ -75,6 +75,7 @@ namespace HotelBackend.Services
                 }
 
                 var guest = await _context.Guests.FindAsync(hotelReview.GuestId);
+
                 if (guest == null)
                 {
                     throw new ServiceException(ErrorCode.NotFound, $"Гость с ID {hotelReview.GuestId} не найден");
@@ -86,12 +87,12 @@ namespace HotelBackend.Services
                 }
 
                 var hotel = await _context.Hotels.FindAsync(hotelReview.HotelId);
+
                 if (hotel == null)
                 {
                     throw new ServiceException(ErrorCode.NotFound, $"Отель с ID {hotelReview.HotelId} не найден");
                 }
 
-                // Получаем все бронирования гостя в этом отеле с платежами
                 var completedBookings = await _context.RoomBookings
                     .Where(rb => rb.GuestId == hotelReview.GuestId && rb.Room.HotelId == hotelReview.HotelId)
                     .Include(rb => rb.RoomPayments)
@@ -99,25 +100,30 @@ namespace HotelBackend.Services
 
                 if (!completedBookings.Any(rb => rb.RoomPayments.Any()))
                 {
-                    throw new ServiceException(ErrorCode.BadRequest, "Гость не имеет завершенных бронирований в этом отеле");
+                    throw new ServiceException(ErrorCode.BadRequest, "Гость не имеет завершённых бронирований в этом отеле");
                 }
 
-                // Проверка, не оставлял ли гость уже отзыв по каждому завершенному бронированию
-                var reviewedBookingIds = await _context.HotelReviews
-                    .Where(hr => hr.GuestId == hotelReview.GuestId && hr.HotelId == hotelReview.HotelId)
-                    .Select(hr => hr.RoomBookingId)
-                    .ToListAsync();
+                var reviewedBooking = await _context.HotelReviews
+                    .Where(hr => hr.GuestId == hotelReview.GuestId && hr.HotelId == hotelReview.HotelId && hr.RoomBookingId == hotelReview.RoomBookingId)
+                    .FirstOrDefaultAsync();
+
+                if (reviewedBooking != null)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Гость уже оставил отзыв для данного бронирования");
+                }
 
                 var unreviewedCompletedBooking = completedBookings
-                    .Where(rb => rb.RoomPayments.Any() && !reviewedBookingIds.Contains(rb.Id))
-                    .FirstOrDefault();
+                    .FirstOrDefault(rb => rb.RoomPayments.Any() && rb.Id == hotelReview.RoomBookingId);
 
                 if (unreviewedCompletedBooking == null)
                 {
-                    throw new ServiceException(ErrorCode.BadRequest, "Гость уже оставил отзыв по всем завершенным бронированиям в этом отеле");
+                    throw new ServiceException(ErrorCode.BadRequest, "Гость не может оставить отзыв для данного бронирования");
                 }
 
-                // Привязываем отзыв к одному из незаревьювленных завершенных бронирований
+                hotelReview.PublicationDate = DateOnly.FromDateTime(DateTime.Now);
+                hotelReview.PublicationTime = TimeOnly.FromDateTime(DateTime.Now);
+
+                hotelReview.RoomBookingId = unreviewedCompletedBooking.Id;
 
                 await _context.HotelReviews.AddAsync(hotelReview);
                 await _context.SaveChangesAsync();
@@ -126,11 +132,10 @@ namespace HotelBackend.Services
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Можно логировать ошибку
-                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при сохранении отзыва", ex);
+                throw;
             }
-        }*/
+        }
     }
 }
