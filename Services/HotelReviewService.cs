@@ -317,5 +317,36 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<int> GetHotelReviewCount()
+        {
+            try
+            {
+                int counter = await _context.HotelReviews.CountAsync();
+                return counter;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<double> GetHotelReviewAvgRating()
+        {
+            try
+            {
+                if (!await _context.HotelReviews.AnyAsync())
+                {
+                    return 0.0;
+                }
+
+                double avgRating = await _context.HotelReviews.AverageAsync(r => r.Rating);
+                return avgRating;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

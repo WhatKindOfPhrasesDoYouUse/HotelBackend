@@ -161,5 +161,33 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
+
+        [HttpGet("count")]
+        public async Task<IActionResult> GetHotelReviewCount()
+        {
+            try
+            {
+                int counter = await _hotelReviewService.GetHotelReviewCount();
+                return StatusCode(200, counter);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpGet("avg")]
+        public async Task<IActionResult> GetHotelReviewAvgRating()
+        {
+            try
+            {
+                double avgRating = await _hotelReviewService.GetHotelReviewAvgRating();
+                return StatusCode(200, avgRating);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
     }
 }
