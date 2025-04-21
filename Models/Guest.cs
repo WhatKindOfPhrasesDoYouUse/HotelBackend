@@ -67,5 +67,6 @@ public partial class Guest
     public virtual ICollection<HotelReview> HotelReviews { get; set; } = new List<HotelReview>();
 
     public virtual ICollection<RoomBooking> RoomBookings { get; set; } = new List<RoomBooking>();
+
     public virtual ICollection<AdditionalGuest> AdditionalGuests { get; set; } = new List<AdditionalGuest>();
 }

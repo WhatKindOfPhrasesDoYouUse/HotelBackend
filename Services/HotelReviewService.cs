@@ -17,6 +17,7 @@ namespace HotelBackend.Services
             {
                 var hotelReviews = await _context.HotelReviews
                     .Include(hr => hr.Guest)
+                        .ThenInclude(g => g.Client)
                     .Include(hr => hr.Hotel)
                     .ToListAsync();
 
