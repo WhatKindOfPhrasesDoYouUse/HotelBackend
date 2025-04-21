@@ -9,5 +9,6 @@ namespace HotelBackend.Contracts
         Task SaveHotelReview(HotelReview hotelReview);
         Task DeleteHotelReviewById(long hotelReviewId);
         Task<HotelReview> UpdateHotelReview(long hotelReviewId, HotelReview newHotelReview);
+        Task<PagedResult<HotelReview>> GetHotelReviewPages(int pageNumber = 1, int pageSize = 10);
     }
 }
