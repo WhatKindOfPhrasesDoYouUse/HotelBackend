@@ -132,5 +132,34 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
+
+        [HttpGet("{guestId:long}/paged")]
+        public async Task<IActionResult> GetHotelReviewPagesByGuestId(long guestId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _hotelReviewService.GetHotelReviewPagesByGuestId(guestId, pageNumber, pageSize);
+                var totalPages = (int)Math.Ceiling((double)result.TotalCount / pageSize);
+
+                var response = new
+                {
+                    items = result.Items,
+                    pageNumber = result.PageNumber,
+                    pageSize = result.PageSize,
+                    totalCount = result.TotalCount,
+                    totalPages = totalPages
+                };
+
+                return StatusCode(200, response);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
     }
 }

@@ -269,5 +269,53 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<PagedResult<HotelReview>> GetHotelReviewPagesByGuestId(long guestId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                if (guestId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id гостя не должно быть меньше или равно 0");
+                }
+
+                var query = _context.HotelReviews
+                    .Include(hr => hr.Guest)
+                        .ThenInclude(g => g.Client)
+                    .Include(hr => hr.Hotel)
+                    .Where(hr => hr.GuestId == guestId)
+                    .AsQueryable();
+
+                var totalCount = await query.CountAsync();
+
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                if (items == null || items.Count == 0)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Отзывы гостя с id: {guestId} не найдены");
+                }
+
+                PagedResult<HotelReview> hotelReviewPages = new PagedResult<HotelReview>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+
+                return hotelReviewPages;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
