@@ -87,10 +87,11 @@ namespace HotelBackend.Services
 
                 var bookings = await _context.RoomBookings
                     .Include(rb => rb.Room)
+                        .ThenInclude(r => r.Amenities)
                     .Where(rb => rb.GuestId == guestId)
                     .ToListAsync();
 
-                if (bookings == null)
+                if (!bookings.Any())
                 {
                     throw new ServiceException(ErrorCode.NotFound, $"Бронирования для гостя с id: {guestId} не найдены");
                 }
@@ -107,8 +108,8 @@ namespace HotelBackend.Services
                         : (DateOnly?)null;
 
                     var cancelUntilTime = booking.CheckInTime != null
-                        ? booking.CheckInTime 
-                        : new TimeOnly(14, 0); 
+                        ? booking.CheckInTime
+                        : new TimeOnly(14, 0);
 
                     return new RoomBookingDto
                     {
@@ -126,9 +127,10 @@ namespace HotelBackend.Services
                         IsPayd = paidBookingIds.Contains(booking.Id),
                         CreatedAt = booking.CreatedAt,
                         IsConfirmed = booking.IsConfirmed,
-                        ConfirmationTime = booking.ConfirmationTime
+                        ConfirmationTime = booking.ConfirmationTime,
+                        Amenities = booking.Room?.Amenities?.ToList() ?? new List<Amenity>()
                     };
-                });
+                }).ToList();
 
                 return bookingDtos;
             }
@@ -138,7 +140,6 @@ namespace HotelBackend.Services
             }
             catch (Exception)
             {
-    
                 throw;
             }
         }

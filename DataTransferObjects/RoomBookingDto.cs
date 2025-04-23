@@ -1,4 +1,6 @@
-﻿namespace HotelBackend.DataTransferObjects
+﻿using HotelBackend.Models;
+
+namespace HotelBackend.DataTransferObjects
 {
     public class RoomBookingDto
     {
@@ -17,5 +19,6 @@
         public DateTime? CreatedAt { get; set; }
         public bool? IsConfirmed { get; set; }
         public DateTime? ConfirmationTime { get; set; }
+        public List<Amenity> Amenities { get; set; } = null!;
     }
 }
