@@ -13,5 +13,6 @@ namespace HotelBackend.Contracts
         Task<PagedResult<HotelReview>> GetHotelReviewPagesByGuestId(long guestId, int pageNumber = 1, int pageSize = 10);
         Task<int> GetHotelReviewCount();
         Task<double> GetHotelReviewAvgRating();
+        Task<bool> HasReviewForBooking(long bookindId);
     }
 }

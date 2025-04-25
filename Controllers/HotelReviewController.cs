@@ -189,5 +189,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
+
+        [HttpGet("{bookindId:long}/availability")]
+        public async Task<IActionResult> HasReviewForBooking(long bookindId)
+        {
+            try
+            {
+                bool availability = await _hotelReviewService.HasReviewForBooking(bookindId);
+                return StatusCode(200, availability);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
     }
 }

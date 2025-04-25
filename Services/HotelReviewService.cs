@@ -348,5 +348,40 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<bool> HasReviewForBooking(long bookindId)
+        {
+            try
+            {
+                if (bookindId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id бронирования не должно быть меньше или равно 0");
+                }
+
+                var booking = await _context.RoomBookings.FindAsync(bookindId);
+
+                if (booking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирования с id: {bookindId} не существует");
+                }
+
+                if (await _context.HotelReviews.FirstOrDefaultAsync(hr => hr.RoomBookingId == bookindId) == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
