@@ -20,14 +20,17 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.BadRequest, $"id бронирования не может быть меньше или равно 0");
                 }
 
-                var booking = await _context.Amenities.FirstOrDefaultAsync(b => b.Id == bookingId);
+                var booking = await _context.RoomBookings
+                    .FirstOrDefaultAsync(b => b.Id == bookingId);
 
                 if (booking == null)
                 {
                     throw new ServiceException(ErrorCode.NotFound, "Забронированная комната не найдена");
                 }
 
-                var amenities = await _context.Amenities.Where(a => a.RoomId == booking.RoomId).ToListAsync();
+                var amenities = await _context.Amenities
+                    .Where(a => a.RoomId == booking.RoomId)
+                    .ToListAsync();
 
                 if (amenities == null)
                 {
