@@ -45,5 +45,40 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Amenity>> GetAllAmenitysByHotelId(long hotelId)
+        {
+            try
+            {
+                if (hotelId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"id отеля не может быть меньше или равно 0");
+                }
+
+                var hotel = await _context.Hotels.FindAsync(hotelId);
+
+                if (hotel == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Отель с id: {hotelId} не найден");
+                }
+
+                var amenitys = await _context.Amenities.ToListAsync();
+
+                if (amenitys ==  null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Дополнительные услуги для отеля с id: {hotelId} не найдены");
+                }
+
+                return amenitys;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
