@@ -15,6 +15,7 @@ public class CleanupRoomBookingService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await CleanupBookings(stoppingToken);
+            await CancelUnpaidBookings(stoppingToken);
             await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
@@ -37,4 +38,28 @@ public class CleanupRoomBookingService : BackgroundService
             }
         }
     }
+
+    private async Task CancelUnpaidBookings(CancellationToken stoppingToken)
+    {
+        using (var scope = _serviceScopeFactory.CreateScope())
+        {
+            var _context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var now = DateTime.UtcNow;
+
+            var unpaidBookings = await _context.RoomBookings
+                .Where(rb => rb.IsConfirmed &&
+                             rb.ConfirmationTime != null &&
+                             rb.ConfirmationTime < now.AddMinutes(-15) &&
+                             !rb.RoomPayments.Any())
+                .ToListAsync(stoppingToken);
+
+            if (unpaidBookings.Any())
+            {
+                _context.RoomBookings.RemoveRange(unpaidBookings);
+                await _context.SaveChangesAsync(stoppingToken);
+            }
+        }
+    }
+
+
 }
