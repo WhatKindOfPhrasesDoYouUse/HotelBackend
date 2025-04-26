@@ -119,6 +119,14 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.EmployeeId)
                 .OnDelete(DeleteBehavior.SetNull)  
                 .HasConstraintName("amenity_booking_employee_id_fkey");
+
+            entity.Property(e => e.RoomBookingId).HasColumnName("room_booking_id");
+
+            entity.HasOne(d => d.RoomBooking)
+                .WithMany(p => p.AmenityBookings)
+                .HasForeignKey(d => d.RoomBookingId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("amenity_booking_room_booking_id_fkey");
         });
 
         modelBuilder.Entity<AmenityPayment>(entity =>
@@ -495,6 +503,11 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasMany(d => d.AmenityBookings)
+                .WithOne(p => p.RoomBooking)
+                .HasForeignKey(p => p.RoomBookingId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<RoomPayment>(entity =>

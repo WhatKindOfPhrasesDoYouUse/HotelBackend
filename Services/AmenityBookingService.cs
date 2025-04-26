@@ -63,7 +63,8 @@ namespace HotelBackend.Services
                     ReadyDate = null,
                     ReadyTime = null,
                     CompletionStatus = "В ожидании подтверждения",
-                    EmployeeId = null
+                    EmployeeId = null,
+                    RoomBookingId = amenityBookingDto.RoomBookingId
                 };
 
                 _context.AmenityBookings.Add(booking);
@@ -80,5 +81,25 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+/*        public async Task<IEnumerable<AmenityBooking>> GetAmenityBookings(long bookindRoomId)
+        {
+            try
+            {
+                if (bookindRoomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"id бронирования ${bookindRoomId} не может быть меньше или равно 0");
+                }
+
+                var bookingRoom = await _context.AmenityBookings.FindAsync(bookindRoomId);
+
+                if (bookingRoom == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирования комнаты с id: ${bookindRoomId} не существует");
+                }
+
+
+            }
+        }*/
     }
 }

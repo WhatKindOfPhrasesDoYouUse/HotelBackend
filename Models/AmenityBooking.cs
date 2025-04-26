@@ -71,6 +71,13 @@ public partial class AmenityBooking
     [Column(name: "employee_id")]
     public long? EmployeeId { get; set; }
 
+
+    [Column(name: "room_booking_id")]
+    [Required(ErrorMessage = "Поле RoomBookingId модели AmenityBooking является обязательным")]
+    public long RoomBookingId { get; set; }
+
+    public virtual RoomBooking RoomBooking { get; set; } = null!;
+
     [ForeignKey(nameof(AmenityId))]
     [InverseProperty("AmenityBookings")]
     public virtual Amenity Amenity { get; set; } = null!;
