@@ -6,5 +6,6 @@ namespace HotelBackend.Contracts
     {
         Task<IEnumerable<Amenity>> GetAmenityByRoomBookingId(long bookingId);
         Task<IEnumerable<Amenity>> GetAllAmenitysByHotelId(long hotelId);
+        Task<Amenity> GetAmenityById(long amenityId);
     }
 }

@@ -83,5 +83,33 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<Amenity> GetAmenityById(long amenityId)
+        {
+            try
+            {
+                if (amenityId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id дополнительной услуги не может быть меньше нуля");
+                }
+
+                var amenity = await _context.Amenities.FindAsync(amenityId);
+
+                if (amenity == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Дополнительная услуга с id: {amenityId} не найдена");
+                }
+
+                return amenity;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -62,7 +62,8 @@ namespace HotelBackend.Services
                     OrderTime = TimeOnly.FromDateTime(DateTime.Now),
                     ReadyDate = null,
                     ReadyTime = null,
-                    CompletionStatus = "В ожидании подтверждения"
+                    CompletionStatus = "В ожидании подтверждения",
+                    EmployeeId = null
                 };
 
                 _context.AmenityBookings.Add(booking);
