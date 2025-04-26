@@ -82,7 +82,7 @@ namespace HotelBackend.Services
             }
         }
 
-/*        public async Task<IEnumerable<AmenityBooking>> GetAmenityBookings(long bookindRoomId)
+        public async Task<IEnumerable<AmenityBooking>> GetAmenityBookings(long bookindRoomId)
         {
             try
             {
@@ -91,15 +91,25 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.BadRequest, $"id бронирования ${bookindRoomId} не может быть меньше или равно 0");
                 }
 
-                var bookingRoom = await _context.AmenityBookings.FindAsync(bookindRoomId);
+                var amenityBookings = await _context.AmenityBookings
+                    .Where(ab => ab.RoomBookingId == bookindRoomId)
+                    .ToListAsync();
 
-                if (bookingRoom == null)
+                if (amenityBookings == null)
                 {
-                    throw new ServiceException(ErrorCode.NotFound, $"Бронирования комнаты с id: ${bookindRoomId} не существует");
+                    throw new ServiceException(ErrorCode.NotFound, $"Данные забронированных дополнительных услуг не найдены");
                 }
 
-
+                return amenityBookings;
             }
-        }*/
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
