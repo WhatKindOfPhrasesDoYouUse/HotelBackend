@@ -43,6 +43,19 @@ namespace HotelBackend.Services
                 {
                     claims.Add(new Claim("role", "guest"));
                 }
+
+                if (!isGuest)
+                {
+                    var employee = _context.Employees
+                        .Include(et => et.EmployeeType)
+                        .FirstOrDefault(e => e.ClientId == client.Id);
+
+                    if (employee != null && employee.EmployeeType != null) 
+                    {
+                        claims.Add(new Claim("role", "employee"));
+                        claims.Add(new Claim("role", employee.EmployeeType.Name ?? string.Empty));
+                    }
+                }
             }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
