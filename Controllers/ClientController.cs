@@ -65,7 +65,7 @@ namespace HotelBackend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Произошла ошибка при обновлении данных клиента.");
+                return StatusCode(500, $"Произошла ошибка при обновлении данных клиента: {ex.Message}");
             }
         }
 
@@ -121,6 +121,24 @@ namespace HotelBackend.Controllers
             catch (ServiceException ex)
             {
                 return StatusCode((int)ex.ErrorCode, new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Внутренняя ошибка сервера: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("{clientId}/employee-type")]
+        public async Task<IActionResult> GetEmployeeTypeByClientId(long clientId)
+        {
+            try
+            {
+                var employeeType = await _clientService.GetEmployeeTypeByClientId(clientId);
+                return StatusCode(200, employeeType);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
             }
             catch (Exception ex)
             {

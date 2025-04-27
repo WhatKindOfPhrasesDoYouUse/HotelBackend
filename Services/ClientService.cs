@@ -257,5 +257,45 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<EmployeeType> GetEmployeeTypeByClientId(long clientId)
+        {
+            try
+            {
+                if (clientId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id клиента не может быть меньше или равно 0");
+                }
+
+                if (await _context.Clients.FindAsync(clientId) == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Не существует клиента с id: {clientId}");
+                }
+
+                var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ClientId == clientId);
+
+                if (employee == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Не существует сотрудника с id клиента: {clientId}");
+                }
+
+                var employeeType = await _context.EmployeeTypes.FirstOrDefaultAsync(et => et.Id == employee.EmployeeTypeId);
+
+                if (employeeType == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Не существует типа сотрудника с id: {employee.EmployeeTypeId}");
+                }
+
+                return employeeType;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
