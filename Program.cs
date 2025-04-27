@@ -46,6 +46,7 @@ builder.Services.AddScoped<IAmenityService, AmenityService>();
 builder.Services.AddScoped<IAmenityBookingService, AmenityBookingService>();
 builder.Services.AddScoped<CleanupRoomBookingService>();
 builder.Services.AddScoped<IHotelReviewService,  HotelReviewService>();
+builder.Services.AddScoped<IAmenityPaymentService, AmenityPaymentService>();
 
 // регистрация фоновых задач
 builder.Services.AddHostedService<CleanupRoomBookingService>();

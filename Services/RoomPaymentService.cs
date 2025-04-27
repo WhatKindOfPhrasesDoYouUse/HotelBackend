@@ -45,7 +45,7 @@ namespace HotelBackend.Services
                 if (roomPaymentDto.RoomBookingId <= 0)
                 {
                     throw new ServiceException(ErrorCode.BadRequest, $"id бронирования не может быть меньше или равно 0");
-                }
+                }   
                 
                 if (await _context.RoomPayments.FirstOrDefaultAsync(rp => rp.RoomBookingId == roomPaymentDto.RoomBookingId) != null)
                 {
