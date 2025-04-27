@@ -68,5 +68,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
+
+        [HttpPatch("{amenityBookingId:long}/{employeeId:long}/done-amenity-task")]
+        public async Task<IActionResult> DoneAmenityTask(long amenityBookingId, long employeeId)
+        {
+            try
+            {
+                var amenityBooking = await _amenityBookingService.DoneAmenityTask(amenityBookingId, employeeId);
+                return StatusCode(200, amenityBooking);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
     }
 }

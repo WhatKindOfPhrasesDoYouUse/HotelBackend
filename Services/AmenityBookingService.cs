@@ -182,5 +182,52 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<AmenityBooking> DoneAmenityTask(long amenityBookingId, long employeeId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id забронированной услуги не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(ab => ab.RoomBooking)
+                    .Include(a => a.Amenity)
+                        .ThenInclude(et => et.EmployeeType)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанная дополнительная услуга с id: {amenityBookingId} не найдена");
+                } 
+
+                if (amenityBooking.CompletionStatus != "В процессе выполнения")
+                {
+                    throw new ServiceException(ErrorCode.Conflict, $"Услуга c id: {amenityBookingId} еще не находится в статусе выполнения");
+                }
+                
+                if (amenityBooking.EmployeeId != employeeId)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Закончить заказ должен тот же сотрудник, который и принял заказ");
+                }
+
+                amenityBooking.CompletionStatus = "Задача выполнена";
+
+                _context.AmenityBookings.Update(amenityBooking);
+                await _context.SaveChangesAsync();
+
+                return amenityBooking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
