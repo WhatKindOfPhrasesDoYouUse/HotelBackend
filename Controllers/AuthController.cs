@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -70,6 +71,25 @@ namespace HotelBackend.Controllers
                 {
                     return StatusCode(401, isValid);
                 }
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpPost("registration-employee")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> RegistrationEmployee(RegistrationEmployeeDto registrationEmployeeDto)
+        {
+            try
+            {
+                var result = await _authService.RegistrationEmployee(registrationEmployeeDto);
+                return StatusCode(200, result);
             }
             catch (ServiceException ex)
             {
