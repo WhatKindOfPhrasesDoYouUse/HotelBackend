@@ -276,5 +276,99 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<AmenityBooking>> GetAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
+        {
+            try
+            {
+                if (employeeTypeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id типа задачи не может быть меньше или равна 0");
+                }
+
+                var employeeType = await _context.EmployeeTypes.FindAsync(employeeTypeId);
+
+                if (employeeType == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Тип задачи с id: {employeeTypeId} не существует");
+                }
+
+                var amenityIds = await _context.Amenities
+                    .Where(a => a.EmployeeTypeId == employeeTypeId)
+                    .Select(a => a.Id)
+                    .ToListAsync();
+
+                if (amenityIds == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Не существует задач с id типа сотрудника: {employeeTypeId}");
+                }
+
+                if (!amenityIds.Any())
+                {
+                    return Enumerable.Empty<AmenityBooking>();
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Where(ab => amenityIds.Contains(ab.AmenityId) && ab.CompletionStatus != "Принята")
+                    .ToListAsync();
+
+                return amenityBookings;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<AmenityBooking>> GetDoneAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
+        {
+            try
+            {
+                if (employeeTypeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id типа задачи не может быть меньше или равна 0");
+                }
+
+                var employeeType = await _context.EmployeeTypes.FindAsync(employeeTypeId);
+
+                if (employeeType == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Тип задачи с id: {employeeTypeId} не существует");
+                }
+
+                var amenityIds = await _context.Amenities
+                    .Where(a => a.EmployeeTypeId == employeeTypeId)
+                    .Select(a => a.Id)
+                    .ToListAsync();
+
+                if (amenityIds == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Не существует задач с id типа сотрудника: {employeeTypeId}");
+                }
+
+                if (!amenityIds.Any())
+                {
+                    return Enumerable.Empty<AmenityBooking>();
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Where(ab => amenityIds.Contains(ab.AmenityId) && ab.CompletionStatus == "Принята")
+                    .ToListAsync();
+
+                return amenityBookings;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
