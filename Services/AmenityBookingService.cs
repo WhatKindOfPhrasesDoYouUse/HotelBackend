@@ -229,5 +229,52 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<AmenityBooking> ConfirmationAmenityFromGuest(long amenityBookingId, long guestId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id бронирования не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(g => g.Guest)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирования с id: {amenityBookingId} не существует");
+                }
+
+                if (amenityBooking.GuestId != guestId) 
+                {
+                    throw new ServiceException(ErrorCode.Conflict, $"Гость с id: ${guestId} не заказывал услугу с id: ${amenityBookingId}");
+                }
+
+                if (amenityBooking.CompletionStatus != "Задача выполнена")
+                {
+                    throw new ServiceException(ErrorCode.Conflict, $"Задача с id: {amenityBookingId} еще не выполнена");
+                }
+
+                amenityBooking.ReadyDate = DateOnly.FromDateTime(DateTime.Now);
+                amenityBooking.ReadyTime = TimeOnly.FromDateTime(DateTime.Now);
+                amenityBooking.CompletionStatus = "Принята";
+
+                _context.AmenityBookings.Update(amenityBooking);
+                await _context.SaveChangesAsync();
+
+                return amenityBooking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
