@@ -324,13 +324,13 @@ namespace HotelBackend.Services
             }
         }
 
-        public async Task<IEnumerable<AmenityBooking>> GetDoneAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
+        public async Task<IEnumerable<DoneAmenityBookingDto>> GetDoneAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
         {
             try
             {
                 if (employeeTypeId <= 0)
                 {
-                    throw new ServiceException(ErrorCode.BadRequest, "id типа задачи не может быть меньше или равна 0");
+                    throw new ServiceException(ErrorCode.BadRequest, "id типа задачи не может быть меньше или равен 0");
                 }
 
                 var employeeType = await _context.EmployeeTypes.FindAsync(employeeTypeId);
@@ -345,18 +345,32 @@ namespace HotelBackend.Services
                     .Select(a => a.Id)
                     .ToListAsync();
 
-                if (amenityIds == null)
-                {
-                    throw new ServiceException(ErrorCode.NotFound, $"Не существует задач с id типа сотрудника: {employeeTypeId}");
-                }
-
                 if (!amenityIds.Any())
                 {
-                    return Enumerable.Empty<AmenityBooking>();
+                    return Enumerable.Empty<DoneAmenityBookingDto>();
                 }
 
                 var amenityBookings = await _context.AmenityBookings
+                    .Include(ab => ab.Amenity)
+                    .Include(ab => ab.Guest)
+                        .ThenInclude(g => g.Client)
+                    .Include(ab => ab.AmenityPayments)
                     .Where(ab => amenityIds.Contains(ab.AmenityId) && ab.CompletionStatus == "Принята")
+                    .Select(ab => new DoneAmenityBookingDto
+                    {
+                        Id = ab.Id,
+                        OrderDate = ab.OrderDate,
+                        OrderTime = ab.OrderTime,
+                        ReadyDate = ab.ReadyDate ?? default,
+                        ReadyTime = ab.ReadyTime ?? default,
+                        CompletionStatus = ab.CompletionStatus,
+                        Quantity = ab.Quantity,
+                        AmenityName = ab.Amenity.Name,
+                        Amount = ab.Quantity * ab.Amenity.UnitPrice,
+                        IsPayd = ab.AmenityPayments.Any() ? "Да" : "Нет",
+                        GuestEmail = ab.Guest.Client.Email,
+                        RoomBookingId = ab.RoomBookingId.ToString()
+                    })
                     .ToListAsync();
 
                 return amenityBookings;
@@ -367,7 +381,7 @@ namespace HotelBackend.Services
             }
             catch (Exception)
             {
-                throw;
+                throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при получении завершенных задач бронирования услуг");
             }
         }
     }
