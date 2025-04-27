@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -38,6 +39,25 @@ namespace HotelBackend.Controllers
             {
                 var amenityBookings = await _amenityBookingService.GetAmenityBookings(roomBookingId);
                 return StatusCode(200, amenityBookings);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpPatch("{amenityBookingId:long}/{employeeId:long}/take-amenity-task")]
+        [Authorize(Roles = "employee")]
+        public async Task<IActionResult> TakeAmenityTask(long amenityBookingId, long employeeId)
+        {
+            try
+            {
+                var amenityBooking = await _amenityBookingService.TakeAmenityTask(amenityBookingId, employeeId);
+                return StatusCode(200, amenityBooking);
             }
             catch (ServiceException ex)
             {

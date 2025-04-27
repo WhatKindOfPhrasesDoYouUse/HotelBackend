@@ -42,11 +42,9 @@ public partial class Employee
     [ForeignKey(nameof(ClientId))]
     public virtual Client Client { get; set; } = null!;
 
-
     [Column("hotel_id")]
     [Required(ErrorMessage = "Поле HotelId модели Employee является обязательным")]
     public long HotelId { get; set; }
-
 
     [ForeignKey(nameof(HotelId))]
     public virtual Hotel Hotel { get; set; } = null!;

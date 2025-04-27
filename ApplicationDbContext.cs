@@ -50,9 +50,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<RoomPayment> RoomPayments { get; set; }
 
-    public virtual DbSet<WorkSchedule> WorkSchedules { get; set; }
-
     public virtual DbSet<RoomComfort> RoomsComforts { get; set; }
+
     public virtual DbSet<AdditionalGuest> AdditionalGuests { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -539,17 +538,6 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("room_payment_room_booking_id_fkey");
         });
 
-        modelBuilder.Entity<WorkSchedule>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("work_schedule_pkey");
-
-            entity.ToTable("work_schedule", "core");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.EndTime).HasColumnName("end_time");
-            entity.Property(e => e.StartTime).HasColumnName("start_time");
-            entity.Property(e => e.WorkDate).HasColumnName("work_date");
-        });
 
         modelBuilder.Entity<AdditionalGuest>(entity =>
         {

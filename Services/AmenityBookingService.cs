@@ -111,5 +111,76 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<AmenityBooking> TakeAmenityTask(long amenityBookingId, long employeeId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id заказа дополнительной услуги не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(a => a.Amenity)
+                        .ThenInclude(et => et.EmployeeType)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанная услуга с id: {amenityBookingId} не нейдена");
+                }
+
+                if (employeeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id сотрудника не может быть меньше или равно 0");
+                }
+
+                if (amenityBooking.CompletionStatus != "В ожидании подтверждения")
+                {
+                    throw new ServiceException(ErrorCode.Conflict, "Заказ уже в процессе выполнения");
+                }
+
+                var employee = await _context.Employees
+                    .Include(et => et.EmployeeType)
+                    .FirstOrDefaultAsync(e => e.Id == employeeId);
+
+                if (employee == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Соотрудник с id: ${employeeId} не найдена");
+                }
+
+                var amenity = await _context.Amenities.FindAsync(amenityBooking.AmenityId);
+
+                if (amenity == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Услуги с id: ${amenityBooking.AmenityId} не существует");
+                }
+
+                amenityBooking.EmployeeId = employee.Id;
+                amenityBooking.CompletionStatus = "В процессе выполнения";
+
+                if (amenity.EmployeeTypeId != employee.EmployeeTypeId)
+                {
+                    amenityBooking.EmployeeId = null;
+                    amenityBooking.CompletionStatus = "В ожидании подтверждения";
+
+                    throw new ServiceException(ErrorCode.NotFound, "Этот пользователь не должен брать задачи данного типа");
+                }
+
+                _context.AmenityBookings.Update(amenityBooking);
+                await _context.SaveChangesAsync();
+
+                return amenityBooking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
