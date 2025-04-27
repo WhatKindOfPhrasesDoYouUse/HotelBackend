@@ -109,5 +109,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { error = $"Внутренняя ошибка сервера: {ex.Message}" });
             }
         }
+
+        [HttpGet("{clientId}/employee")]
+        public async Task<IActionResult> GetEmployeeByClientId(long clientId)
+        {
+            try
+            {
+                var employee = await _clientService.GetEmployeeByClientId(clientId);
+                return StatusCode(200, employee);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Внутренняя ошибка сервера: {ex.Message}" });
+            }
+        }
     }
 }

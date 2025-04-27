@@ -200,5 +200,62 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<EmployeeDto> GetEmployeeByClientId(long clientId)
+        {
+            try
+            {
+                if (clientId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id клиента не может быть меньше или равно 0");
+                }
+
+                var client = await _context.Clients.FindAsync(clientId);
+
+                if (client == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Клиент с id: {clientId} не найден");
+                }
+
+                var employee = await _context.Employees
+                    .Include(et => et.EmployeeType)
+                    .FirstOrDefaultAsync(e => e.ClientId == client.Id);
+
+                if (employee == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Сотрудник для клиента с id: {clientId} не найден");
+                }
+
+                if (employee.EmployeeType == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Тип сотрудника не найден для сотрудника с id: {employee.Id}");
+                }
+
+                if (employee.EmployeeType.Name == "guest")
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Это гость");
+                }
+
+                EmployeeDto employeeDto = new EmployeeDto
+                {
+                    Name = client.Name,
+                    Surname = client.Surname,
+                    Patronymic = client.Patronymic,
+                    Email = client.Email,
+                    PhoneNumber = client.PhoneNumber,
+                    Role = employee.EmployeeType.Name
+                };
+
+                return employeeDto;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

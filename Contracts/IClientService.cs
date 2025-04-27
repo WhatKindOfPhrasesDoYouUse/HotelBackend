@@ -9,5 +9,6 @@ namespace HotelBackend.Contracts
         Task<Client> UpdateClientGuest(long clientId, UpdateClientGuestDto updateClientGuestDto);
         Task<string> UpdatePassword(long clientId, UpdatePasswordDto updatePasswordDto);
         Task DeleteClientByGuestId(long guestId);
+        Task<EmployeeDto> GetEmployeeByClientId(long clientId);
     }
 }

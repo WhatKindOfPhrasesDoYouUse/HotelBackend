@@ -95,10 +95,10 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.NotFound, $"Пользователь с таким {authDto.Email} не найден");
                 }
 
-/*                if (!VerifyPassword(client, authDto.Password))
+                if (!VerifyPassword(client, authDto.Password))
                 {
                     throw new ServiceException(ErrorCode.Unauthorized, $"Пользователь c id {client.Id} не прошел верефикацию по паролю");
-                }*/
+                }
 
                 return GenerateJwtToken(client);
             }
