@@ -105,6 +105,7 @@ namespace HotelBackend.Controllers
         }
 
         [HttpGet("{employeeTypeId:long}/tasks-by-employee-type")]
+        [Authorize(Roles = "employee")]
         public async Task<IActionResult> GetAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
         {
             try
@@ -123,6 +124,7 @@ namespace HotelBackend.Controllers
         }
 
         [HttpGet("{employeeTypeId:long}/done-tasks-by-employee-type")]
+        [Authorize(Roles = "employee")]
         public async Task<IActionResult> GetDoneAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
         {
             try
