@@ -87,6 +87,6 @@ public partial class AmenityBooking
 
     [ForeignKey(nameof(EmployeeId))]
     public virtual Employee Employee { get; set; } = null!;
-
     public virtual ICollection<AmenityPayment> AmenityPayments { get; set; } = new List<AmenityPayment>();
+    public virtual AmenityReview? AmenityReview { get; set; }
 }

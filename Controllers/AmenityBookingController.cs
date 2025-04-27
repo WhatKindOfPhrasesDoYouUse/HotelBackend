@@ -51,7 +51,6 @@ namespace HotelBackend.Controllers
         }
 
         [HttpPatch("{amenityBookingId:long}/{employeeId:long}/take-amenity-task")]
-        [Authorize(Roles = "employee")]
         public async Task<IActionResult> TakeAmenityTask(long amenityBookingId, long employeeId)
         {
             try

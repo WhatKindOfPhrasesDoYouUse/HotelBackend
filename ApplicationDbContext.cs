@@ -126,6 +126,12 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.RoomBookingId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("amenity_booking_room_booking_id_fkey");
+
+            entity.HasOne(d => d.AmenityReview)
+                .WithOne(p => p.AmenityBooking)
+                .HasForeignKey<AmenityReview>(p => p.AmenityBookingId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("amenity_booking_amenity_review_fkey");
         });
 
         modelBuilder.Entity<AmenityPayment>(entity =>
@@ -177,6 +183,9 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Guest).WithMany(p => p.AmenityReviews)
                 .HasForeignKey(d => d.GuestId)
                 .HasConstraintName("amenity_review_guest_id_fkey");
+
+            entity.HasIndex(e => e.AmenityBookingId)
+                .IsUnique();
         });
 
         modelBuilder.Entity<Bank>(entity =>
