@@ -496,5 +496,58 @@ namespace HotelBackend.Services
                 throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при получении завершенных задач бронирования услуг");
             }
         }
+
+        public async Task<IEnumerable<InProgressAmenityBookingDto>> GetTakedAmenityTasks(long employeeId)
+        {
+            try
+            {
+                if (employeeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id сотрудника не может быть меньше или равен 0");
+                }
+
+                var employee = await _context.Employees.FindAsync(employeeId);
+
+                if (employee == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Сотрудник с id: {employeeId} не существует");
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Include(ab => ab.Amenity)
+                    .Include(ab => ab.Guest)
+                        .ThenInclude(g => g.Client)
+                    .Include(ab => ab.RoomBooking)
+                    .Include(ab => ab.AmenityPayments)
+                    .Where(ab => ab.EmployeeId == employeeId && ab.CompletionStatus == "В процессе выполнения")
+                    .Select(ab => new InProgressAmenityBookingDto
+                    {
+                        Id = ab.Id,
+                        OrderDate = ab.OrderDate,
+                        OrderTime = ab.OrderTime,
+                        ReadyDate = ab.ReadyDate ?? default,
+                        ReadyTime = ab.ReadyTime ?? default,
+                        CompletionStatus = ab.CompletionStatus,
+                        Quantity = ab.Quantity,
+                        AmenityName = ab.Amenity.Name,
+                        TotalAmount = ab.Quantity * ab.Amenity.UnitPrice,
+                        IsPayd = ab.AmenityPayments.Any(),
+                        GuestName = ab.Guest.Client.Name, 
+                        RoomBookingId = ab.RoomBookingId.ToString(),
+                        RoomNumber = ab.RoomBooking.Room!.RoomNumber
+                    })
+                    .ToListAsync();
+
+                return amenityBookings;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при получении задач бронирования услуг в процессе выполнения");
+            }
+        }
     }
 }

@@ -15,5 +15,6 @@ namespace HotelBackend.Contracts
         Task<IEnumerable<DoneAmenityBookingDto>> GetDoneAmenityBookingTasksByEmployeeTypeId(long employeeTypeId);
         Task<IEnumerable<OrderedAmenitDto>> GetDetailAmenityBookingsByBookingRoomId(long bookingRoomId);
         Task<OrderedAmenitDto> GetDetailAmenityBookingByBookingRoomId(long bookingAmenityId);
+        Task<IEnumerable<InProgressAmenityBookingDto>> GetTakedAmenityTasks(long employeeId);
     }
 }
