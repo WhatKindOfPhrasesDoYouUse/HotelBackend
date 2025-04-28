@@ -238,6 +238,7 @@ namespace HotelBackend.Services
 
                 EmployeeDto employeeDto = new EmployeeDto
                 {
+                    Id = employee.Id,
                     Name = client.Name,
                     Surname = client.Surname,
                     Patronymic = client.Patronymic,

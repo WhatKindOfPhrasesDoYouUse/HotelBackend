@@ -377,7 +377,7 @@ namespace HotelBackend.Services
             }
         }
 
-        public async Task<IEnumerable<AmenityBooking>> GetAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
+        public async Task<IEnumerable<DetailAmenityBookingDto>> GetAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
         {
             try
             {
@@ -398,14 +398,9 @@ namespace HotelBackend.Services
                     .Select(a => a.Id)
                     .ToListAsync();
 
-                if (amenityIds == null)
-                {
-                    throw new ServiceException(ErrorCode.NotFound, $"Не существует задач с id типа сотрудника: {employeeTypeId}");
-                }
-
                 if (!amenityIds.Any())
                 {
-                    return Enumerable.Empty<AmenityBooking>();
+                    return Enumerable.Empty<DetailAmenityBookingDto>();
                 }
 
                 var amenityBookings = await _context.AmenityBookings
@@ -414,6 +409,19 @@ namespace HotelBackend.Services
                         && ab.EmployeeId == null
                         && ab.AmenityPayments.Any()
                     )
+                    .Select(ab => new DetailAmenityBookingDto
+                    {
+                        Id = ab.Id,
+                        OrderDate = ab.OrderDate,
+                        OrderTime = ab.OrderTime,
+                        CompletionStatus = ab.CompletionStatus,
+                        Quantity = ab.Quantity,
+                        AmenityName = ab.Amenity.Name, 
+                        GuestName = ab.Guest.Client.Name,     
+                        RoomNumber = ab.RoomBooking.Room!.RoomNumber, 
+                        IsPayd = ab.AmenityPayments.Any(), 
+                        TotalAmount = ab.AmenityPayments.Sum(ap => ap.TotalAmount)
+                    })
                     .ToListAsync();
 
                 return amenityBookings;
