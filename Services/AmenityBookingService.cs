@@ -112,7 +112,7 @@ namespace HotelBackend.Services
             }
         }
 
-        public async Task<IEnumerable<OrderedAmenitDto>> GetDetailAmenityBookingByBookingRoomId(long bookingRoomId)
+        public async Task<IEnumerable<OrderedAmenitDto>> GetDetailAmenityBookingsByBookingRoomId(long bookingRoomId)
         {
             try
             {
@@ -152,6 +152,55 @@ namespace HotelBackend.Services
                 });
 
                 return amenityBookingDtos;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<OrderedAmenitDto> GetDetailAmenityBookingByBookingRoomId(long bookingAmenityId)
+        {
+            try
+            {
+                if (bookingAmenityId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id забронированной комнаты не может быть меньше или равен 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(a => a.Amenity)
+                    .Include(e => e.Employee)
+                        .ThenInclude(c => c.Client)
+                    .Include(g => g.Guest)
+                    .FirstOrDefaultAsync(ab => ab.Id == bookingAmenityId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанные услуги с id: {bookingAmenityId} не найдена");
+                }
+
+                OrderedAmenitDto orderedAmenitDto = new OrderedAmenitDto
+                {
+                    Id = amenityBooking.Id,
+                    OrderDate = amenityBooking.OrderDate,
+                    OrderTime = amenityBooking.OrderTime,
+                    ReadyDate = amenityBooking.ReadyDate,
+                    ReadyTime = amenityBooking.ReadyTime,
+                    CompletionStatus = amenityBooking.CompletionStatus,
+                    Quantity = amenityBooking.Quantity,
+                    EmployeeName = amenityBooking.Employee?.Client != null
+                        ? $"{amenityBooking.Employee.Client.Name} {amenityBooking.Employee.Client.Surname}"
+                        : "Не назначено",
+                    TotalAmount = amenityBooking.Amenity.UnitPrice * amenityBooking.Quantity,
+                    IsPayd = amenityBooking.AmenityPayments.Any(ap => ap.PaymentStatus == "Оплачено")
+                };
+
+                return orderedAmenitDto;
             }
             catch (ServiceException)
             {
