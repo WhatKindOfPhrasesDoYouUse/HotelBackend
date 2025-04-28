@@ -12,5 +12,7 @@
         public string EmployeeName { get; set; } = null!;
         public decimal TotalAmount { get; set; }
         public bool IsPayd { get; set; } = false;
+        public long AmenityId { get; set; }
+        public string AmenityName { get; set; } = null!;
     }
 }

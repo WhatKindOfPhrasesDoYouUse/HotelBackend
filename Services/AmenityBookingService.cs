@@ -148,7 +148,9 @@ namespace HotelBackend.Services
                         ? $"{ab.Employee.Client.Name} {ab.Employee.Client.Surname}"
                         : "Не назначено",
                     TotalAmount = ab.Amenity.UnitPrice * ab.Quantity,
-                    IsPayd = ab.AmenityPayments.Any(ap => ap.PaymentStatus == "Оплачено")
+                    IsPayd = ab.AmenityPayments.Any(ap => ap.PaymentStatus == "Оплачено"),
+                    AmenityId = ab.Amenity.Id,
+                    AmenityName = ab.Amenity.Name
                 });
 
                 return amenityBookingDtos;
