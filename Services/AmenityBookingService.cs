@@ -409,7 +409,11 @@ namespace HotelBackend.Services
                 }
 
                 var amenityBookings = await _context.AmenityBookings
-                    .Where(ab => amenityIds.Contains(ab.AmenityId) && ab.CompletionStatus != "Принята")
+                    .Where(ab =>
+                        amenityIds.Contains(ab.AmenityId)
+                        && ab.EmployeeId == null
+                        && ab.AmenityPayments.Any()
+                    )
                     .ToListAsync();
 
                 return amenityBookings;
