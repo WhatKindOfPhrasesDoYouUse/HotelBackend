@@ -112,6 +112,57 @@ namespace HotelBackend.Services
             }
         }
 
+        public async Task<IEnumerable<OrderedAmenitDto>> GetDetailAmenityBookingByBookingRoomId(long bookingRoomId)
+        {
+            try
+            {
+                if (bookingRoomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id забронированной комнаты не может быть меньше или равен 0");
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Include(a => a.Amenity)
+                    .Include(e => e.Employee)
+                        .ThenInclude(c => c.Client)
+                    .Include(g => g.Guest)
+                    .Include(ab => ab.AmenityPayments)
+                    .Where(ab => ab.RoomBookingId == bookingRoomId)
+                    .ToListAsync();
+
+                if (amenityBookings == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанные услуги с id забронированной комнаты: {bookingRoomId} не найдены");
+                }
+
+                var amenityBookingDtos = amenityBookings.Select(ab => new OrderedAmenitDto
+                {
+                    Id = ab.Id,
+                    OrderDate = ab.OrderDate,
+                    OrderTime = ab.OrderTime,
+                    ReadyDate = ab.ReadyDate,
+                    ReadyTime = ab.ReadyTime,
+                    CompletionStatus = ab.CompletionStatus,
+                    Quantity = ab.Quantity,
+                    EmployeeName = ab.Employee?.Client != null
+                        ? $"{ab.Employee.Client.Name} {ab.Employee.Client.Surname}"
+                        : "Не назначено",
+                    TotalAmount = ab.Amenity.UnitPrice * ab.Quantity,
+                    IsPayd = ab.AmenityPayments.Any(ap => ap.PaymentStatus == "Оплачено")
+                });
+
+                return amenityBookingDtos;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<AmenityBooking> TakeAmenityTask(long amenityBookingId, long employeeId)
         {
             try

@@ -50,6 +50,24 @@ namespace HotelBackend.Controllers
             }
         }
 
+        [HttpGet("{roomBookingId:long}/details/room-booking")]
+        public async Task<IActionResult> GetDetailAmenityBookingByBookingRoomId(long roomBookingId)
+        {
+            try
+            {
+                var amenityBookings = await _amenityBookingService.GetDetailAmenityBookingByBookingRoomId(roomBookingId);
+                return StatusCode(200, amenityBookings);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
         [HttpPatch("{amenityBookingId:long}/{employeeId:long}/take-amenity-task")]
         public async Task<IActionResult> TakeAmenityTask(long amenityBookingId, long employeeId)
         {
