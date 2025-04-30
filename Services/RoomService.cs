@@ -238,5 +238,46 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<DateOnly> GetNextAvailableDate(long roomId)
+        {
+            try
+            {
+                if (roomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id комнаты не может быть меньше или равно 0");
+                }
+
+                var room = await _context.Rooms
+                    .Include(rb => rb.RoomBookings)
+                    .FirstOrDefaultAsync(r => r.Id == roomId);
+
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {roomId} не найдена");
+                }
+
+                if (room.RoomBookings == null || !room.RoomBookings.Any())
+                {
+                    return DateOnly.FromDateTime(DateTime.UtcNow);
+                }
+
+                var lastCheckout = room.RoomBookings
+                    .Where(rb => rb.CheckOutDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+                    .OrderByDescending(rb => rb.CheckOutDate)
+                    .Select(rb => rb.CheckOutDate)
+                    .FirstOrDefault();
+
+                return lastCheckout.AddDays(1);
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -147,5 +147,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
             }
         }
+
+        [HttpGet("{roomId:long}/next-available-date")]
+        public async Task<IActionResult> GetNextAvailableDate(long roomId)
+        {
+            try
+            {
+                var availableDate = await _roomService.GetNextAvailableDate(roomId);
+                return StatusCode(200, availableDate);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
+            }
+        }
     }
 }
