@@ -10,5 +10,6 @@ namespace HotelBackend.Contracts
         Task<IEnumerable<Comfort>> GetComfortsByRoomId(long roomId);
         Task<IEnumerable<Room>> FilterRoomsByComforts(long hotelId, List<long>? comfortIds);
         Task<Room> GetRoomById(long roomId);
+        Task<bool> HasRoomIsAvailable(long roomId);
     }
 }

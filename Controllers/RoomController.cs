@@ -129,5 +129,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
             }
         }
+
+        [HttpGet("{roomId:long}/has-room-is-available")]
+        public async Task<IActionResult> HasRoomIsAvailable(long roomId)
+        {
+            try
+            {
+                var result = await _roomService.HasRoomIsAvailable(roomId);
+                return StatusCode(200, result);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
+            }
+        }
     }
 }

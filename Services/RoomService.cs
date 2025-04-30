@@ -204,5 +204,39 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<bool> HasRoomIsAvailable(long roomId)
+        {
+            try
+            {
+                if (roomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id комнаты не может быть меньше или равно 0");
+                }
+
+                var room = await _context.Rooms
+                    .Include(r => r.RoomBookings)
+                    .FirstOrDefaultAsync(r => r.Id == roomId);
+
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {roomId} не найдена");
+                }
+
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+                bool isOccupied = room.RoomBookings.Any(rb => rb.CheckInDate <= today && rb.CheckOutDate >= today);
+
+                return !isOccupied;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
