@@ -89,5 +89,85 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<AmenityReview>> GetAmenityReviewsByRoomId(long roomId)
+        {
+            try
+            {
+                var amenityReviews = await _context.AmenityReviews
+                    .Include(g => g.Guest)
+                        .ThenInclude(c => c.Client)
+                    .Include(r => r.Amenity)
+                        .ThenInclude(r => r.Room)
+                    .Where(ar => ar.Amenity!.Room.Id == roomId)
+                    .OrderByDescending(ar => ar.PublicationDate)
+                    .ToListAsync();
+
+                if (amenityReviews == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Отзывы об услуге отсутствуют");
+                }
+
+                return amenityReviews;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<AmenityReview>> GetAmenityReviewsByRoomIdPages(long roomId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var query = _context.AmenityReviews
+                    .Include(g => g.Guest)
+                        .ThenInclude(c => c.Client)
+                    .Include(r => r.Amenity)
+                        .ThenInclude(r => r.Room)
+                    .Where(ar => ar.Amenity!.Room.Id == roomId)
+                    .OrderByDescending(ar => ar.PublicationDate)
+                    .AsQueryable();
+
+                var totalCount = await query.CountAsync();
+
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                if (items == null || items.Count == 0)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Отзывы об услугах отсутствуют");
+                }
+
+                PagedResult<AmenityReview> amenityReviewPages = new PagedResult<AmenityReview>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+
+                if (amenityReviewPages == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Страницы не получены");
+                }
+
+                return amenityReviewPages;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
