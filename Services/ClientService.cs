@@ -98,7 +98,7 @@ namespace HotelBackend.Services
                         client.Guest.CityOfResidence = updateClientGuestDto.CityOfResidence;
 
                     if (updateClientGuestDto.DateOfBirth.HasValue)
-                        client.Guest.DateOfBirth = updateClientGuestDto.DateOfBirth.Value;
+                        client.Guest.DateOfBirth = updateClientGuestDto.DateOfBirth.Value.ToUniversalTime();
 
                     if (!string.IsNullOrEmpty(updateClientGuestDto.PassportSeriesHash))
                         client.Guest.PassportSeriesHash = updateClientGuestDto.PassportSeriesHash;
@@ -120,7 +120,7 @@ namespace HotelBackend.Services
             }
             catch (Exception ex)
             {
-                throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при обновлении данных клиента.", ex);
+                throw new ServiceException(ErrorCode.InternalServerError, ex.Message);
             }
         }
 
