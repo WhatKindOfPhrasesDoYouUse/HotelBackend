@@ -7,5 +7,6 @@ namespace HotelBackend.Contracts
         Task<IEnumerable<AmenityReview>> GetAmenityReviewsByRoomId(long roomId);
         Task<PagedResult<AmenityReview>> GetAmenityReviewsByRoomIdPages(long roomId, int pageNumber = 1, int pageSize = 10);
         Task<AmenityReview> SaveAmenityReview(AmenityReview amenityReview);
+        Task<bool> HasReviewForAmenityBooking(long bookingId);
     }
 }

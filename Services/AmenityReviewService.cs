@@ -169,5 +169,40 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<bool> HasReviewForAmenityBooking(long bookingId)
+        {
+            try
+            {
+                if (bookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id услуги не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings.FindAsync(bookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирования дополнительной услуги с id: {bookingId} не существует");
+                } 
+
+                if (await _context.AmenityReviews.FirstOrDefaultAsync(ar => ar.AmenityBookingId == amenityBooking.Id) == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
