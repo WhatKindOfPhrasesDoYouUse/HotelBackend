@@ -551,5 +551,39 @@ namespace HotelBackend.Services
                 throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при получении задач бронирования услуг в процессе выполнения");
             }
         }
+
+        public async Task DeleteAmenityBookingById(long amenityBookingId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "id бронирования дополнительной услуги не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings.FindAsync(amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирование дополнительной услуги с id: {amenityBookingId} не найдено");
+                }
+
+                if (amenityBooking.CompletionStatus != "В ожидании подтверждения")
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Выполнение брони услуги с id: {amenityBookingId} начато, отменить бронь не возможно");
+                }
+
+                _context.AmenityBookings.Remove(amenityBooking);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

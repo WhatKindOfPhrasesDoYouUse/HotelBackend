@@ -196,5 +196,23 @@ namespace HotelBackend.Controllers
                 return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
             }
         }
+
+        [HttpDelete("{amenityBookingId:long}")]
+        public async Task<IActionResult> DeleteAmenityBookingById(long amenityBookingId)
+        {
+            try
+            {
+                await _amenityBookingService.DeleteAmenityBookingById(amenityBookingId);
+                return StatusCode(200, "Бронирование дополнительной услуги успешно удалено");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
     }
 }
