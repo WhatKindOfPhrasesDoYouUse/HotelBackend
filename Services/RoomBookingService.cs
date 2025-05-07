@@ -153,7 +153,9 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.BadRequest, "id бронирования не может быть меньше или равно нулю");
                 }
 
-                var booking = await _context.RoomBookings.FirstOrDefaultAsync(b => b.Id == bookingId);
+                var booking = await _context.RoomBookings
+                    .Include(rp => rp.RoomPayments)
+                    .FirstOrDefaultAsync(b => b.Id == bookingId);
 
                 if (booking == null)
                 {
@@ -174,6 +176,43 @@ namespace HotelBackend.Services
                 if (currentDateTime > cancelUntilDateTime)
                 {
                     throw new ServiceException(ErrorCode.BadRequest, "Срок для отмены бронирования прошел.");
+                }
+
+                var payment = await _context.RoomPayments.FirstOrDefaultAsync(rp => rp.RoomBookingId == booking.Id);
+
+                if (payment != null)
+                {
+                    _context.RoomPayments.Remove(payment);
+                }
+
+                var review = await _context.HotelReviews.FirstOrDefaultAsync(hr => hr.RoomBookingId == booking.Id);
+
+                if (review != null)
+                {
+                    _context.HotelReviews.Remove(review);
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Include(ap => ap.AmenityPayments)
+                    .Include(ar => ar.AmenityReview)
+                    .Where(ab => ab.RoomBookingId == booking.Id).ToListAsync();
+
+                if (amenityBookings.Any() || amenityBookings != null)
+                {
+                    _context.AmenityBookings.RemoveRange(amenityBookings);
+                }
+
+                foreach (var amenityBooking in amenityBookings!)
+                {
+                    if (amenityBooking.AmenityPayments.Any())
+                    {
+                        _context.AmenityPayments.RemoveRange(amenityBooking.AmenityPayments);
+                    }
+
+                    if (amenityBooking.AmenityReview != null)
+                    {
+                        _context.AmenityReviews.Remove(amenityBooking.AmenityReview);
+                    }
                 }
 
                 _context.RoomBookings.Remove(booking);
