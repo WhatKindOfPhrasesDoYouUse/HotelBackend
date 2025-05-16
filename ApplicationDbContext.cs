@@ -408,7 +408,9 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("hotel_type", "core");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id")
+            .UseIdentityAlwaysColumn();
+
             entity.Property(e => e.Description).HasColumnName("description");
 
             entity.HasMany(ht => ht.Hotels)

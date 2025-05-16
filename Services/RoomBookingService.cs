@@ -88,6 +88,7 @@ namespace HotelBackend.Services
                 var bookings = await _context.RoomBookings
                     .Include(rb => rb.Room)
                         .ThenInclude(r => r.Amenities)
+                    .Include(ag => ag.AdditionalGuests)
                     .Where(rb => rb.GuestId == guestId)
                     .ToListAsync();
 
