@@ -62,10 +62,10 @@ public partial class Hotel
     public double Rating { get; set; } = 1;
 
     [Column(name: "hotel_type_id")]
-    public long HotelTypeId { get; set; }
+    public long? HotelTypeId { get; set; }
 
     [ForeignKey(nameof(HotelTypeId))]
-    public HotelType HotelType { get; set; } = null!;
+    public HotelType? HotelType { get; set; }
 
     public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 

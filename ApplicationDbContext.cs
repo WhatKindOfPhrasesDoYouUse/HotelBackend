@@ -363,8 +363,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.YearOfConstruction).HasColumnName("year_of_construction");
 
             entity.Property(e => e.HotelTypeId)
-                .HasColumnName("hotel_type_id")
-                .IsRequired();
+                .HasColumnName("hotel_type_id");
 
             entity.HasOne(h => h.HotelType)
                 .WithMany(ht => ht.Hotels)
