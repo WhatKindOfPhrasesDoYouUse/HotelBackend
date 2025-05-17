@@ -194,7 +194,10 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("bank", "core");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .UseIdentityAlwaysColumn();
+
         });
 
         modelBuilder.Entity<Card>(entity =>
