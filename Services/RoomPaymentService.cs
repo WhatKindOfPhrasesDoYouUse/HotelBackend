@@ -157,5 +157,65 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<RoomPayment>> GetRoomPayments()
+        {
+            try
+            {
+                var roomPayments = await _context.RoomPayments
+                    .Include(rb => rb.PaymentType)
+                    .ToListAsync();
+
+                if (roomPayments == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Данные оплаты комнат не найдены");
+                }
+
+                return roomPayments;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteRoomPaymentById(long roomPaymentId)
+        {
+            try
+            {
+                if (roomPaymentId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id оплаты комнаты не может быть меньше или равно 0");
+                }
+
+                var roomPayment = await _context.RoomPayments
+                    .Include(rb => rb.RoomBooking)
+                    .FirstOrDefaultAsync(rp => rp.Id == roomPaymentId);
+
+                if (roomPayment == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Оплата комнаты с id: {roomPaymentId} не найдена");
+                }
+
+                roomPayment.RoomBooking.IsConfirmed = false;
+                roomPayment.RoomBooking.ConfirmationTime = null;
+                roomPayment.RoomBooking.CreatedAt = DateTime.UtcNow;
+
+                _context.RoomPayments.Remove(roomPayment);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

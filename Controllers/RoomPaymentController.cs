@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -38,6 +39,44 @@ namespace HotelBackend.Controllers
             {
                 var roomPaymentDetailsDto = await _roomPaymentService.GetDetailsByBookingId(bookingId);
                 return StatusCode(200, roomPaymentDetailsDto);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetRoomPayments()
+        {
+            try
+            {
+                var roomPayments = await _roomPaymentService.GetRoomPayments();
+                return StatusCode(200, roomPayments);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{roomPaymentId:long}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> DeleteRoomPaymentById(long roomPaymentId)
+        {
+            try
+            {
+                await _roomPaymentService.DeleteRoomPaymentById(roomPaymentId);
+                return StatusCode(200, "Платеж успешно обновлен");
             }
             catch (ServiceException ex)
             {
