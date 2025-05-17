@@ -307,7 +307,9 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("employee_type", "core");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+            .UseIdentityAlwaysColumn()
+            .HasColumnName("id");
         });
 
         modelBuilder.Entity<Guest>(entity =>
