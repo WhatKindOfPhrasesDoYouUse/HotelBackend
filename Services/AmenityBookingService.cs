@@ -561,7 +561,9 @@ namespace HotelBackend.Services
                     throw new ServiceException(ErrorCode.NotFound, "id бронирования дополнительной услуги не может быть меньше или равно 0");
                 }
 
-                var amenityBooking = await _context.AmenityBookings.FindAsync(amenityBookingId);
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(ap => ap.AmenityPayments)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
 
                 if (amenityBooking == null)
                 {
@@ -572,7 +574,7 @@ namespace HotelBackend.Services
                 {
                     throw new ServiceException(ErrorCode.NotFound, $"Выполнение брони услуги с id: {amenityBookingId} начато, отменить бронь не возможно");
                 }
-
+                _context.AmenityPayments.RemoveRange(amenityBooking.AmenityPayments);
                 _context.AmenityBookings.Remove(amenityBooking);
                 await _context.SaveChangesAsync();
             }

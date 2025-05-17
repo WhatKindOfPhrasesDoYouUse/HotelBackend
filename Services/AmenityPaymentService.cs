@@ -83,5 +83,59 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<AmenityPayment>> GetAmenityPayments()
+        {
+            try
+            {
+                var amenityPayments = await _context.AmenityPayments
+                    .Include(rb => rb.PaymentType)
+                    .ToListAsync();
+
+                if (amenityPayments == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Данные оплаты комнат не найдены");
+                }
+
+                return amenityPayments;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteAmenityPaymentById(long amenityPaymentId)
+        {
+            try
+            {
+                if (amenityPaymentId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "id платежы услуги не может быть меньше или равно 0");
+                }
+
+                var amenityPayment = await _context.AmenityPayments.FindAsync(amenityPaymentId);
+
+                if (amenityPayment == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Платеж услуги с id: {amenityPaymentId} не найден");
+                }
+
+                _context.AmenityPayments.Remove(amenityPayment);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
