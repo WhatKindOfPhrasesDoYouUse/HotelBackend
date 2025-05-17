@@ -204,5 +204,57 @@ namespace HotelBackend.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<AmenityReview>> GetAmenityReviews()
+        {
+            try
+            {
+                var amenityReviews = await _context.AmenityReviews.ToListAsync();
+
+                if (amenityReviews == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Отзывы на дополнительные услуги");
+                }
+
+                return amenityReviews;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteAmenityReviewById(long amenityReviewId)
+        {
+            try
+            {
+                if (amenityReviewId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id услуги не может быть меньше или равно 0");
+                }
+
+                var amenityReview = await _context.AmenityReviews.FindAsync(amenityReviewId);
+
+                if (amenityReview == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Отзыва на дополнительную услугу с id: {amenityReviewId} не существует");
+                }
+
+                _context.AmenityReviews.Remove(amenityReview);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

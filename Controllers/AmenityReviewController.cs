@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBackend.Controllers
@@ -85,6 +86,43 @@ namespace HotelBackend.Controllers
             {
                 bool availability = await _amenityReviewService.HasReviewForAmenityBooking(bookingId);
                 return StatusCode(200, availability);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAmenityReviews()
+        {
+            try
+            {
+                var amenityReviews = await _amenityReviewService.GetAmenityReviews();
+                return StatusCode(200, amenityReviews);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{amenityReviewId:long}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> DeleteAmenityReviewById(long amenityReviewId)
+        {
+            try
+            {
+                await _amenityReviewService.DeleteAmenityReviewById(amenityReviewId);
+                return StatusCode(200, "Отзыв на дополнительную услугу успешно удален");
             }
             catch (ServiceException ex)
             {
