@@ -226,5 +226,32 @@ namespace HotelBackend.Services
                 throw new ServiceException(ErrorCode.InternalServerError, $"Произошла ошибка со стороны сервера при получении карты: {ex.Message}");
             }
         }
+
+        public async Task<IEnumerable<Card>> GetAllCards()
+        {
+            try
+            {
+                var cards = await _context.Cards
+                    .Include(b => b.Bank)
+                    .Include(g => g.Guest)
+                        .ThenInclude(c => c.Client)
+                    .ToListAsync();
+
+                if (cards == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Карты не найдены");
+                }
+
+                return cards;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

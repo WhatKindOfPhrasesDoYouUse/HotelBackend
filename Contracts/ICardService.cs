@@ -11,5 +11,6 @@ namespace HotelBackend.Contracts
         Task<CardDto> GetCardById(long cardId);
         Task DeleteCardById(long cardId);
         Task UpdateCard(long cardId, CardDto cardDto);
+        Task<IEnumerable<Card>> GetAllCards();
     }
 }

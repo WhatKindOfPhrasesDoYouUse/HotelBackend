@@ -2,6 +2,7 @@
 using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,7 @@ namespace HotelBackend.Controllers
         public CardController(ICardService cardService) => this._cardService = cardService;
 
         [HttpPost]
+        [Authorize(Roles = "guest")]
         public async Task<IActionResult> CreateCard([FromBody] Card card)
         {
             if (card == null)
@@ -62,6 +64,7 @@ namespace HotelBackend.Controllers
         }
 
         [HttpDelete("{cardId:long}")]
+        [Authorize(Roles = "Administrator, guest")]
         public async Task<IActionResult> DeleteCardById(long cardId)
         {
             try
@@ -104,6 +107,25 @@ namespace HotelBackend.Controllers
             {
                 var card = await _cardService.GetCardById(cardId);
                 return StatusCode(200, card);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Произошла ошибка при получении данных карты: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> GetAllCards()
+        {
+            try
+            {
+                var cards = await _cardService.GetAllCards();
+                return StatusCode(200, cards);
             }
             catch (ServiceException ex)
             {
