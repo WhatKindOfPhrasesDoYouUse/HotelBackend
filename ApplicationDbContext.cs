@@ -549,7 +549,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasOne(d => d.RoomBooking).WithMany(p => p.RoomPayments)
                 .HasForeignKey(d => d.RoomBookingId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("room_payment_room_booking_id_fkey");
         });
 

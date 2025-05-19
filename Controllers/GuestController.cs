@@ -1,6 +1,7 @@
 ﻿using HotelBackend.Contracts;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,13 +39,51 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpGet("{clientId}")]
+        [HttpGet("{clientId:long}")]
         public async Task<IActionResult> GetGuestByClientId(long clientId)
         {
             try
             {
                 var guest = await _guestService.GetGuestByClientId(clientId);
                 return Ok(guest);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при получении данных гостя", details = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> GetGuests()
+        {
+            try
+            {
+                var guests = await _guestService.GetGuests();
+                return StatusCode(200, guests);
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка при получении данных гостя", details = ex.Message });
+            }
+        }
+
+        [HttpDelete("{guestId:long}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> DeleteGuestById(long guestId)
+        {
+            try
+            {
+                await _guestService.DeleteGuestById(guestId);
+                return StatusCode(200, "Гость успешно удален");
             }
             catch (ServiceException ex)
             {

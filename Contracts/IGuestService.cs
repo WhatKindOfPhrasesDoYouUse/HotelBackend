@@ -7,5 +7,7 @@ namespace HotelBackend.Contracts
     {
         Task<Guest> BindCardToGuest(long clientId, long cardId);
         Task<Guest> GetGuestByClientId(long clientId);
+        Task<IEnumerable<Guest>> GetGuests();
+        Task DeleteGuestById(long guestId);
     }
 }

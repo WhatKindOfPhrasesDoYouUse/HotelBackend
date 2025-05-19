@@ -107,5 +107,65 @@ namespace HotelBackend.Services
                 throw new ServiceException(ErrorCode.InternalServerError, "Произошла ошибка при получении данных гостя", ex);
             }
         }
+
+        public async Task<IEnumerable<Guest>> GetGuests()
+        {
+            try
+            {
+                var guests = await _context.Guests
+                    .Include(c => c.Client)
+                    .ToListAsync();
+
+                if (guests == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "Гости не найдены");
+                }
+
+                return guests;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteGuestById(long guestId)
+        {
+            try
+            {
+                if (guestId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Id не может быть меньше или равно 0");
+                }
+
+                var guest = await _context.Guests
+                    .Include(c => c.Client)
+                    .Include(c => c.Card)
+                    .FirstOrDefaultAsync(g => g.Id == guestId);
+
+                if (guest == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Гость с id: {guestId} не найден");
+                }
+
+                if (guest.Card != null) _context.Cards.Remove(guest.Card);
+
+                _context.Clients.Remove(guest.Client);
+                _context.Guests.Remove(guest);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

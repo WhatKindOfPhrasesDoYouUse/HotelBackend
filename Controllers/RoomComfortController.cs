@@ -23,10 +23,12 @@ namespace HotelBackend.Controllers
             }
             catch (ServiceException ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode((int)ex.ErrorCode, new { message = ex.Message });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
             }
         }
@@ -69,19 +71,5 @@ namespace HotelBackend.Controllers
             }
         }
 
-        [HttpGet("{roomId:long}/{comfortId:long}")]
-        public async Task<IActionResult> GetRoomComfort(long roomId, long comfortId)
-        {
-            try
-            {
-                var roomComfort = await _roomComfortService.GetRoomComfort(roomId, comfortId);
-                return StatusCode(200, roomComfort);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return StatusCode(500, new { message = "Ошибка сервера", details = ex.Message });
-            }
-        }
     }
 }
