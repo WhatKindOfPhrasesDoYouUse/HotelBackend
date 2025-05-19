@@ -1,4 +1,5 @@
 ﻿using HotelBackend.Contracts;
+using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -164,6 +165,64 @@ namespace HotelBackend.Controllers
             {
                 return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
             }
+        }
+
+        [HttpDelete("{roomId:long}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> DeleteRoomById(long roomId)
+        {
+            try
+            {
+                await _roomService.DeleteRoomById(roomId);
+                return StatusCode(200, "Комната успешно удалена");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> SaveRoom(Room room)
+        {
+            try
+            {
+                await _roomService.SaveRoom(room);
+                return StatusCode(201, "Комната успешно создана");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
+            }
+        }
+
+        [HttpPatch("{roomId:long}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> UpdateRoomById(long roomId, UpdateRoomDto roomDto)
+        {
+            try
+            {
+                await _roomService.UpdateRoomById(roomId, roomDto);
+                return StatusCode(200, "Комната успешно обновлена");
+            }
+            catch (ServiceException ex)
+            {
+                return StatusCode((int)ex.ErrorCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Произошла ошибка сервера", details = ex.Message });
+            }
+
         }
     }
 }

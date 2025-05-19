@@ -1,4 +1,5 @@
 ﻿using HotelBackend.Contracts;
+using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -269,6 +270,115 @@ namespace HotelBackend.Services
                     .FirstOrDefault();
 
                 return lastCheckout.AddDays(1);
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteRoomById(long roomId)
+        {
+            try
+            {
+                if (roomId < 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "ID комнаты не может быть отрицательным");
+                }
+
+                var room = await _context.Rooms
+                    .Include(rb => rb.RoomBookings)
+                        .ThenInclude(rp => rp.RoomPayments)
+                    .Include(ab => ab.Amenities)
+                        .ThenInclude(ab => ab.AmenityBookings)
+                            .ThenInclude(ap => ap.AmenityPayments)
+                    .FirstOrDefaultAsync(r => r.Id == roomId);
+
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с ID: {roomId} не найдена");
+                }
+
+                _context.Rooms.Remove(room);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task SaveRoom(Room room)
+        {
+            try
+            {
+                var existingRoom = await _context.Rooms.FirstOrDefaultAsync(r => r.RoomNumber == room.RoomNumber);
+
+                if (existingRoom != null)
+                {
+                    throw new ServiceException(ErrorCode.Conflict, "Такая комната уже существует");
+                }
+
+                await _context.Rooms.AddAsync(room);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateRoomById(long roomId, UpdateRoomDto roomDto)
+        {
+            try
+            {
+                if (roomId < 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "ID комнаты не может быть отрицательным");
+                }
+
+                var room = await _context.Rooms.FindAsync(roomId);
+
+                if (room == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Комната с id: {roomId} не найдена");
+                }
+
+                if (roomDto.RoomNumber.HasValue/* && await _context.Rooms.FirstOrDefaultAsync(r => r.RoomNumber == roomDto.RoomNumber) == null*/)
+                {
+                    room.RoomNumber = roomDto.RoomNumber.Value;
+                }
+                else
+                {
+                    throw new ServiceException(ErrorCode.Conflict, "Комната с таким номером уже существует");
+                }
+
+                if (!string.IsNullOrWhiteSpace(roomDto.Description))
+                    room.Description = roomDto.Description;
+
+                if (roomDto.Capacity.HasValue)
+                    room.Capacity = roomDto.Capacity.Value;
+
+                if (roomDto.UnitPrice.HasValue)
+                    room.UnitPrice = roomDto.UnitPrice.Value;
+
+                if (roomDto.HotelId.HasValue)
+                    room.HotelId = roomDto.HotelId.Value;
+
+                _context.Rooms.Update(room);
+                await _context.SaveChangesAsync();
             }
             catch (ServiceException)
             {

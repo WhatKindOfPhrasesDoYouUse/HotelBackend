@@ -1,4 +1,5 @@
-﻿using HotelBackend.Models;
+﻿using HotelBackend.DataTransferObjects;
+using HotelBackend.Models;
 
 namespace HotelBackend.Contracts
 {
@@ -12,5 +13,8 @@ namespace HotelBackend.Contracts
         Task<Room> GetRoomById(long roomId);
         Task<bool> HasRoomIsAvailable(long roomId);
         Task<DateOnly> GetNextAvailableDate(long roomId);
+        Task DeleteRoomById(long roomId);
+        Task SaveRoom(Room room);
+        Task UpdateRoomById(long roomId, UpdateRoomDto roomDto);
     }
 }

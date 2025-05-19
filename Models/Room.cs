@@ -34,7 +34,7 @@ public partial class Room
     public long HotelId { get; set; }
 
     [Column(name: "HotelId")]
-    public virtual Hotel Hotel { get; set; } = null!;
+    public virtual Hotel? Hotel { get; set; } = null!;
 
     public virtual ICollection<Amenity> Amenities { get; set; } = new List<Amenity>();
 
