@@ -42,6 +42,6 @@ public partial class Client
     [MaxLength(150, ErrorMessage = "Длинна поля PasswordHash модели Client не может превышать 150 символов")]
     public string PasswordHash { get; set; } = null!;
 
-    public virtual Guest Guest { get; set; } = null!;
-    public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
+    public virtual Guest? Guest { get; set; } = null!;
+    public virtual ICollection<Employee>? Employees { get; set; } = new List<Employee>();
 }

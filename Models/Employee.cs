@@ -26,7 +26,7 @@ public partial class Employee
     public long EmployeeTypeId { get; set; }
 
     [ForeignKey(nameof(EmployeeTypeId))]
-    public virtual EmployeeType EmployeeType { get; set; } = null!;
+    public virtual EmployeeType? EmployeeType { get; set; } = null!;
 
 /*    [Column(name: "work_schedule_id")]
     public long? WorkScheduleId { get; set; }
@@ -40,14 +40,14 @@ public partial class Employee
     public long ClientId { get; set; }
 
     [ForeignKey(nameof(ClientId))]
-    public virtual Client Client { get; set; } = null!;
+    public virtual Client? Client { get; set; } = null!;
 
     [Column("hotel_id")]
     [Required(ErrorMessage = "Поле HotelId модели Employee является обязательным")]
     public long HotelId { get; set; }
 
     [ForeignKey(nameof(HotelId))]
-    public virtual Hotel Hotel { get; set; } = null!;
+    public virtual Hotel? Hotel { get; set; } = null!;
 
     public virtual ICollection<AmenityBooking> AmenityBookings { get; set; } = new List<AmenityBooking>();
 }
