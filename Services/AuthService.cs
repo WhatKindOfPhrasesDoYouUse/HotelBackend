@@ -2,7 +2,6 @@
 using HotelBackend.DataTransferObjects;
 using HotelBackend.Exceptions;
 using HotelBackend.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -247,57 +246,5 @@ namespace HotelBackend.Services
                 throw;
             }
         }
-
-        /*public async Task<string> Registration(RegistrationGuestDto registrationGuestDto)
-        {
-            if (registrationGuestDto.Client == null || registrationGuestDto.Guest == null)
-            {
-                throw new ServiceException(ErrorCode.BadRequest, "Отсутствует информация о клиенте (и/или) госте");
-            }
-
-            var existingClient = await _context.Clients.FirstOrDefaultAsync(c => c.Email == registrationGuestDto.Client.Email);
-
-            if (existingClient != null)
-            {
-                throw new ServiceException(ErrorCode.BadRequest, "Клиент с таким email уже существует");
-            }
-
-            try
-            {
-                Client client = new Client()
-                {
-                    Name = registrationGuestDto.Client.Name,
-                    Surname = registrationGuestDto.Client.Surname,
-                    Patronymic = registrationGuestDto.Client.Patronymic,
-                    Email = registrationGuestDto.Client.Email,
-                    PhoneNumber = registrationGuestDto.Client.PhoneNumber,
-                    PasswordHash = HashPassword(registrationGuestDto.Client, registrationGuestDto.Client.PasswordHash)
-                };
-
-                _context.Clients.Add(client);
-                await _context.SaveChangesAsync();
-
-                Guest guest = new Guest()
-                {
-                    CityOfResidence = registrationGuestDto.Guest.CityOfResidence,
-                    DateOfBirth = registrationGuestDto.Guest.DateOfBirth.Kind == DateTimeKind.Unspecified
-                        ? DateTime.SpecifyKind(registrationGuestDto.Guest.DateOfBirth, DateTimeKind.Utc)
-                        : registrationGuestDto.Guest.DateOfBirth.ToUniversalTime(),
-                    PassportSeriesHash = registrationGuestDto.Guest.PassportSeriesHash,
-                    PassportNumberHash = registrationGuestDto.Guest.PassportNumberHash,
-                    LoyaltyStatus = registrationGuestDto.Guest.LoyaltyStatus,
-                    ClientId = client.Id
-                };
-
-                _context.Guests.Add(guest);
-                await _context.SaveChangesAsync();
-
-                return $"{client.ToString()} {guest.ToString()}";
-            }
-            catch (ServiceException ex)
-            {
-                throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при регистрации", ex);
-            }
-        }*/
     }
 }

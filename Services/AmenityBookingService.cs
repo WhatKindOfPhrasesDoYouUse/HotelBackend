@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelBackend.Services
 {
-    public class AmenityBookingService : IAmenityBookingService
+    public class  AmenityBookingService : IAmenityBookingService
     {
         private readonly ApplicationDbContext _context;
 

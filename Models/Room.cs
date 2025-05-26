@@ -29,6 +29,10 @@ public partial class Room
     [Range(1, int.MaxValue, ErrorMessage = "Поле UnitPrice модели Room должно быть больше 0")]
     public int UnitPrice { get; set; }
 
+    [Column(name: "area")]
+    [Range(1, int.MaxValue, ErrorMessage = "Поле Aream модели Room должно быть больше 0")]
+    public double Area { get; set; }
+
     [Column(name: "hotel_id")]
     [Required(ErrorMessage = "Поле HotelId модели Room является обязательным")]
     public long HotelId { get; set; }
