@@ -1,0 +1,12 @@
+﻿using HotelBackend.DataTransferObjects;
+
+namespace HotelBackend.Contracts
+{
+    public interface IAuthService
+    {
+        Task<string> Login(AuthDto authDto);
+        Task<string> RegistrationGuest(RegistrationGuestDto registrationGuestDto);
+        Task<bool> ClientVerification(VerificationDto verificationDto);
+        Task<string> RegistrationEmployee(RegistrationEmployeeDto registrationEmployeeDto);
+    }
+}

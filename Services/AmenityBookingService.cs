@@ -1,0 +1,590 @@
+﻿using HotelBackend.Contracts;
+using HotelBackend.DataTransferObjects;
+using HotelBackend.Exceptions;
+using HotelBackend.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace HotelBackend.Services
+{
+    public class  AmenityBookingService : IAmenityBookingService
+    {
+        private readonly ApplicationDbContext _context;
+
+        public AmenityBookingService(ApplicationDbContext context) => this._context = context;
+
+        public async Task<AmenityBooking> SaveAmenityBooking(AmenityBookingDto amenityBookingDto)
+        {
+            try
+            {
+                if (amenityBookingDto.AmenityId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"id дополнительной услуги не может быть меньше или равно нулю");
+                }
+
+                var amenity = await _context.Amenities.FindAsync(amenityBookingDto.AmenityId);
+
+                if (amenity == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Дополнительная услуга с id: {amenityBookingDto.AmenityId} не найдена");
+                }
+
+                if (amenityBookingDto.GuestId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id гостя не может быть меньше или равно нулю");
+                }
+
+                var guest = await _context.Guests.FindAsync(amenityBookingDto.GuestId);
+
+                if (guest == null)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"Гость с id: {amenityBookingDto.GuestId} не найден");
+                }
+
+                if (amenityBookingDto.Quantity <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "Количество заказанных дополнительных услуг не может быть меньше или равно нулю");
+                }
+
+                var roomBookings = await _context.RoomBookings.Where(rb => rb.GuestId == amenityBookingDto.GuestId).ToListAsync();
+
+                if (roomBookings == null || !roomBookings.Any())
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Для гостя с id: {amenityBookingDto.GuestId} забронированный комнаты не найдены");
+                }
+
+                var booking = new AmenityBooking
+                {
+                    AmenityId = amenityBookingDto.AmenityId,
+                    GuestId = amenityBookingDto.GuestId,
+                    Quantity = amenityBookingDto.Quantity,
+                    OrderDate = DateOnly.FromDateTime(DateTime.Now),
+                    OrderTime = TimeOnly.FromDateTime(DateTime.Now),
+                    ReadyDate = null,
+                    ReadyTime = null,
+                    CompletionStatus = "В ожидании подтверждения",
+                    EmployeeId = null,
+                    RoomBookingId = amenityBookingDto.RoomBookingId
+                };
+
+                _context.AmenityBookings.Add(booking);
+                await _context.SaveChangesAsync();
+
+                return booking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<AmenityBooking>> GetAmenityBookings(long bookindRoomId)
+        {
+            try
+            {
+                if (bookindRoomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, $"id бронирования ${bookindRoomId} не может быть меньше или равно 0");
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Where(ab => ab.RoomBookingId == bookindRoomId)
+                    .ToListAsync();
+
+                if (amenityBookings == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Данные забронированных дополнительных услуг не найдены");
+                }
+
+                return amenityBookings;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<OrderedAmenitDto>> GetDetailAmenityBookingsByBookingRoomId(long bookingRoomId)
+        {
+            try
+            {
+                if (bookingRoomId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id забронированной комнаты не может быть меньше или равен 0");
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Include(a => a.Amenity)
+                    .Include(e => e.Employee)
+                        .ThenInclude(c => c.Client)
+                    .Include(g => g.Guest)
+                    .Include(ab => ab.AmenityPayments)
+                    .Where(ab => ab.RoomBookingId == bookingRoomId)
+                    .ToListAsync();
+
+                if (amenityBookings == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанные услуги с id забронированной комнаты: {bookingRoomId} не найдены");
+                }
+
+                var amenityBookingDtos = amenityBookings.Select(ab => new OrderedAmenitDto
+                {
+                    Id = ab.Id,
+                    OrderDate = ab.OrderDate,
+                    OrderTime = ab.OrderTime,
+                    ReadyDate = ab.ReadyDate,
+                    ReadyTime = ab.ReadyTime,
+                    CompletionStatus = ab.CompletionStatus,
+                    Quantity = ab.Quantity,
+                    EmployeeName = ab.Employee?.Client != null
+                        ? $"{ab.Employee.Client.Name} {ab.Employee.Client.Surname}"
+                        : "Не назначено",
+                    TotalAmount = ab.Amenity.UnitPrice * ab.Quantity,
+                    IsPayd = ab.AmenityPayments.Any(ap => ap.PaymentStatus == "Оплачено"),
+                    AmenityId = ab.Amenity.Id,
+                    AmenityName = ab.Amenity.Name
+                });
+
+                return amenityBookingDtos;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<OrderedAmenitDto> GetDetailAmenityBookingByBookingRoomId(long bookingAmenityId)
+        {
+            try
+            {
+                if (bookingAmenityId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id забронированной комнаты не может быть меньше или равен 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(a => a.Amenity)
+                    .Include(e => e.Employee)
+                        .ThenInclude(c => c.Client)
+                    .Include(g => g.Guest)
+                    .FirstOrDefaultAsync(ab => ab.Id == bookingAmenityId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанные услуги с id: {bookingAmenityId} не найдена");
+                }
+
+                OrderedAmenitDto orderedAmenitDto = new OrderedAmenitDto
+                {
+                    Id = amenityBooking.Id,
+                    OrderDate = amenityBooking.OrderDate,
+                    OrderTime = amenityBooking.OrderTime,
+                    ReadyDate = amenityBooking.ReadyDate,
+                    ReadyTime = amenityBooking.ReadyTime,
+                    CompletionStatus = amenityBooking.CompletionStatus,
+                    Quantity = amenityBooking.Quantity,
+                    EmployeeName = amenityBooking.Employee?.Client != null
+                        ? $"{amenityBooking.Employee.Client.Name} {amenityBooking.Employee.Client.Surname}"
+                        : "Не назначено",
+                    TotalAmount = amenityBooking.Amenity.UnitPrice * amenityBooking.Quantity,
+                    IsPayd = amenityBooking.AmenityPayments.Any(ap => ap.PaymentStatus == "Оплачено")
+                };
+
+                return orderedAmenitDto;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<AmenityBooking> TakeAmenityTask(long amenityBookingId, long employeeId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id заказа дополнительной услуги не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(a => a.Amenity)
+                        .ThenInclude(et => et.EmployeeType)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанная услуга с id: {amenityBookingId} не нейдена");
+                }
+
+                if (employeeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id сотрудника не может быть меньше или равно 0");
+                }
+
+                if (amenityBooking.CompletionStatus != "В ожидании подтверждения")
+                {
+                    throw new ServiceException(ErrorCode.Conflict, "Заказ уже в процессе выполнения");
+                }
+
+                var employee = await _context.Employees
+                    .Include(et => et.EmployeeType)
+                    .FirstOrDefaultAsync(e => e.Id == employeeId);
+
+                if (employee == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Соотрудник с id: ${employeeId} не найдена");
+                }
+
+                var amenity = await _context.Amenities.FindAsync(amenityBooking.AmenityId);
+
+                if (amenity == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Услуги с id: ${amenityBooking.AmenityId} не существует");
+                }
+
+                amenityBooking.EmployeeId = employee.Id;
+                amenityBooking.CompletionStatus = "В процессе выполнения";
+
+                if (amenity.EmployeeTypeId != employee.EmployeeTypeId)
+                {
+                    amenityBooking.EmployeeId = null;
+                    amenityBooking.CompletionStatus = "В ожидании подтверждения";
+
+                    throw new ServiceException(ErrorCode.NotFound, "Этот пользователь не должен брать задачи данного типа");
+                }
+
+                _context.AmenityBookings.Update(amenityBooking);
+                await _context.SaveChangesAsync();
+
+                return amenityBooking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<AmenityBooking> DoneAmenityTask(long amenityBookingId, long employeeId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id забронированной услуги не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(ab => ab.RoomBooking)
+                    .Include(a => a.Amenity)
+                        .ThenInclude(et => et.EmployeeType)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Заказанная дополнительная услуга с id: {amenityBookingId} не найдена");
+                } 
+
+                if (amenityBooking.CompletionStatus != "В процессе выполнения")
+                {
+                    throw new ServiceException(ErrorCode.Conflict, $"Услуга c id: {amenityBookingId} еще не находится в статусе выполнения");
+                }
+                
+                if (amenityBooking.EmployeeId != employeeId)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Закончить заказ должен тот же сотрудник, который и принял заказ");
+                }
+
+                amenityBooking.CompletionStatus = "Задача выполнена";
+
+                _context.AmenityBookings.Update(amenityBooking);
+                await _context.SaveChangesAsync();
+
+                return amenityBooking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<AmenityBooking> ConfirmationAmenityFromGuest(long amenityBookingId, long guestId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id бронирования не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(g => g.Guest)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирования с id: {amenityBookingId} не существует");
+                }
+
+                if (amenityBooking.GuestId != guestId) 
+                {
+                    throw new ServiceException(ErrorCode.Conflict, $"Гость с id: ${guestId} не заказывал услугу с id: ${amenityBookingId}");
+                }
+
+                if (amenityBooking.CompletionStatus != "Задача выполнена")
+                {
+                    throw new ServiceException(ErrorCode.Conflict, $"Задача с id: {amenityBookingId} еще не выполнена");
+                }
+
+                amenityBooking.ReadyDate = DateOnly.FromDateTime(DateTime.Now);
+                amenityBooking.ReadyTime = TimeOnly.FromDateTime(DateTime.Now);
+                amenityBooking.CompletionStatus = "Принята";
+
+                _context.AmenityBookings.Update(amenityBooking);
+                await _context.SaveChangesAsync();
+
+                return amenityBooking;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<DetailAmenityBookingDto>> GetAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
+        {
+            try
+            {
+                if (employeeTypeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id типа задачи не может быть меньше или равна 0");
+                }
+
+                var employeeType = await _context.EmployeeTypes.FindAsync(employeeTypeId);
+
+                if (employeeType == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Тип задачи с id: {employeeTypeId} не существует");
+                }
+
+                var amenityIds = await _context.Amenities
+                    .Where(a => a.EmployeeTypeId == employeeTypeId)
+                    .Select(a => a.Id)
+                    .ToListAsync();
+
+                if (!amenityIds.Any())
+                {
+                    return Enumerable.Empty<DetailAmenityBookingDto>();
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Where(ab =>
+                        amenityIds.Contains(ab.AmenityId)
+                        && ab.EmployeeId == null
+                        && ab.AmenityPayments.Any()
+                    )
+                    .Select(ab => new DetailAmenityBookingDto
+                    {
+                        Id = ab.Id,
+                        OrderDate = ab.OrderDate,
+                        OrderTime = ab.OrderTime,
+                        CompletionStatus = ab.CompletionStatus,
+                        Quantity = ab.Quantity,
+                        AmenityName = ab.Amenity.Name, 
+                        GuestName = ab.Guest.Client.Name,     
+                        RoomNumber = ab.RoomBooking.Room!.RoomNumber, 
+                        IsPayd = ab.AmenityPayments.Any(), 
+                        TotalAmount = ab.AmenityPayments.Sum(ap => ap.TotalAmount)
+                    })
+                    .ToListAsync();
+
+                return amenityBookings;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<DoneAmenityBookingDto>> GetDoneAmenityBookingTasksByEmployeeTypeId(long employeeTypeId)
+        {
+            try
+            {
+                if (employeeTypeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id типа задачи не может быть меньше или равен 0");
+                }
+
+                var employeeType = await _context.EmployeeTypes.FindAsync(employeeTypeId);
+
+                if (employeeType == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Тип задачи с id: {employeeTypeId} не существует");
+                }
+
+                var amenityIds = await _context.Amenities
+                    .Where(a => a.EmployeeTypeId == employeeTypeId)
+                    .Select(a => a.Id)
+                    .ToListAsync();
+
+                if (!amenityIds.Any())
+                {
+                    return Enumerable.Empty<DoneAmenityBookingDto>();
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Include(ab => ab.Amenity)
+                    .Include(ab => ab.Guest)
+                        .ThenInclude(g => g.Client)
+                    .Include(ab => ab.AmenityPayments)
+                    .Where(ab => amenityIds.Contains(ab.AmenityId) && ab.CompletionStatus == "Принята")
+                    .Select(ab => new DoneAmenityBookingDto
+                    {
+                        Id = ab.Id,
+                        OrderDate = ab.OrderDate,
+                        OrderTime = ab.OrderTime,
+                        ReadyDate = ab.ReadyDate ?? default,
+                        ReadyTime = ab.ReadyTime ?? default,
+                        CompletionStatus = ab.CompletionStatus,
+                        Quantity = ab.Quantity,
+                        AmenityName = ab.Amenity.Name,
+                        Amount = ab.Quantity * ab.Amenity.UnitPrice,
+                        IsPayd = ab.AmenityPayments.Any() ? "Да" : "Нет",
+                        GuestEmail = ab.Guest.Client.Email,
+                        RoomBookingId = ab.RoomBookingId.ToString()
+                    })
+                    .ToListAsync();
+
+                return amenityBookings;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при получении завершенных задач бронирования услуг");
+            }
+        }
+
+        public async Task<IEnumerable<InProgressAmenityBookingDto>> GetTakedAmenityTasks(long employeeId)
+        {
+            try
+            {
+                if (employeeId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.BadRequest, "id сотрудника не может быть меньше или равен 0");
+                }
+
+                var employee = await _context.Employees.FindAsync(employeeId);
+
+                if (employee == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Сотрудник с id: {employeeId} не существует");
+                }
+
+                var amenityBookings = await _context.AmenityBookings
+                    .Include(ab => ab.Amenity)
+                    .Include(ab => ab.Guest)
+                        .ThenInclude(g => g.Client)
+                    .Include(ab => ab.RoomBooking)
+                    .Include(ab => ab.AmenityPayments)
+                    .Where(ab => ab.EmployeeId == employeeId && ab.CompletionStatus == "В процессе выполнения")
+                    .Select(ab => new InProgressAmenityBookingDto
+                    {
+                        Id = ab.Id,
+                        OrderDate = ab.OrderDate,
+                        OrderTime = ab.OrderTime,
+                        ReadyDate = ab.ReadyDate ?? default,
+                        ReadyTime = ab.ReadyTime ?? default,
+                        CompletionStatus = ab.CompletionStatus,
+                        Quantity = ab.Quantity,
+                        AmenityName = ab.Amenity.Name,
+                        TotalAmount = ab.Quantity * ab.Amenity.UnitPrice,
+                        IsPayd = ab.AmenityPayments.Any(),
+                        GuestName = ab.Guest.Client.Name, 
+                        RoomBookingId = ab.RoomBookingId.ToString(),
+                        RoomNumber = ab.RoomBooking.Room!.RoomNumber
+                    })
+                    .ToListAsync();
+
+                return amenityBookings;
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new ServiceException(ErrorCode.InternalServerError, "Ошибка при получении задач бронирования услуг в процессе выполнения");
+            }
+        }
+
+        public async Task DeleteAmenityBookingById(long amenityBookingId)
+        {
+            try
+            {
+                if (amenityBookingId <= 0)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, "id бронирования дополнительной услуги не может быть меньше или равно 0");
+                }
+
+                var amenityBooking = await _context.AmenityBookings
+                    .Include(ap => ap.AmenityPayments)
+                    .FirstOrDefaultAsync(ab => ab.Id == amenityBookingId);
+
+                if (amenityBooking == null)
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Бронирование дополнительной услуги с id: {amenityBookingId} не найдено");
+                }
+
+                if (amenityBooking.CompletionStatus != "В ожидании подтверждения")
+                {
+                    throw new ServiceException(ErrorCode.NotFound, $"Выполнение брони услуги с id: {amenityBookingId} начато, отменить бронь не возможно");
+                }
+                _context.AmenityPayments.RemoveRange(amenityBooking.AmenityPayments);
+                _context.AmenityBookings.Remove(amenityBooking);
+                await _context.SaveChangesAsync();
+            }
+            catch (ServiceException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+    }
+}

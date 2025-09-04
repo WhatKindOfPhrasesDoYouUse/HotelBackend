@@ -1,0 +1,49 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace HotelBackend.Models;
+
+[Table(name: "hotel_review", Schema = "core")]
+public partial class HotelReview
+{
+    [Column(name: "id")]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    [Column(name: "comment")]
+    public string? Comment { get; set; }
+
+    [Column(name: "publication_date")]
+    [Required(ErrorMessage = "Поле PublicationDate модели HotelReview является обязательным")]
+    public DateOnly PublicationDate { get; set; }
+
+    [Column(name: "publication_time")]
+    [Required(ErrorMessage = "Поле PublicationTime модели HotelReview является обязательным")]
+    public TimeOnly PublicationTime { get; set; }
+
+    [Column(name: "rating")]
+    [Required(ErrorMessage = "Поле Rating модели HotelReview является обязательным")]
+    [Range(1, 5, ErrorMessage = "Поле Rating модели HotelReview должно быть в пределах от 1 до 5.")]
+    public int Rating { get; set; }
+
+    [Column(name: "room_booking_id")]
+    [Required(ErrorMessage = "Поле RoomBookingId модели HotelReview является обязательным")]
+    public long RoomBookingId { get; set; }
+
+    [Column(name: "guest_id")]
+    [Required(ErrorMessage = "Поле QuestId модели HotelReview является обязательным")]
+    public long GuestId { get; set; }
+
+    [Column(name: "hotel_id")]
+    [Required(ErrorMessage = "Поле HotelId модели HotelReview является обязательным")]
+    public long HotelId { get; set; }
+
+    public virtual RoomBooking? RoomBooking { get; set; } = null!;
+
+    [ForeignKey(nameof(GuestId))]
+    public virtual Guest? Guest { get; set; } = null!;
+
+    [ForeignKey(nameof(HotelId))]
+    public virtual Hotel? Hotel { get; set; } = null!;
+}
