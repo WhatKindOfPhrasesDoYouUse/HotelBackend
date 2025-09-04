@@ -12,7 +12,6 @@ namespace HotelBackend.Services
 
         public AmenityBookingService(ApplicationDbContext context) => this._context = context;
 
-        // TODO: сделать проверку на попадание в даты бронирования
         public async Task<AmenityBooking> SaveAmenityBooking(AmenityBookingDto amenityBookingDto)
         {
             try
